@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BB Karaoke</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <!-- Logo -->
+    <div class="logo">
+        <a href="/" class="logo-text">BB Karaoke</a>
+    </div>
+
+    <!-- Accordion Navigation -->
+    <div class="accordion-nav">
+        <button class="accordion-btn" onclick="toggleAccordion()">☰</button>
+        <div class="accordion-content">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/queue" class="nav-link">Queue</a>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <form method="POST" id="search-form">
+                <div class="search-bar">
+                    <input type="text" name="search" id="search" placeholder="Search by song or artist name..." value="{{ request.form.get('search') or '' }}" required>
+                    <button type="submit" class="search-button">
+                        <img src="{{ url_for('static', filename='magnifying-glass-icon.png') }}" alt="Search" class="search-icon">
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Local Search Results -->
+        <div class="results-container" {% if not search_results and not request.form.get('search') %}style="display:none;"{% endif %}>
+            {% if search_results %}
+                <h2>Search Results:</h2> <!-- Add this heading for local search results -->
+                <div class="results-list">
+                    {% for result in search_results %}
+                        <div class="result-item" onclick="location.href='/start_download/{{ result['spotify_url'] }}'">
+                            <strong>{{ result.song_name }}</strong><br>
+                            <span class="artist">by: {{ result.artist_name }}</span><br>
+                            <span class="album">album: {{ result.album_name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {% if request.form.get('search') %}
+                    <h2>No results found.</h2>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Add the "Search the Internet" button, shown only if local results exist -->
+        <div class="internet-search-container" {% if not request.form.get('search') %}style="display:none;"{% endif %}>
+            <form method="POST" id="search-internet-form">
+                <input type="hidden" name="search_internet" value="{{ request.form.get('search') }}">
+                <button type="submit" class="search-internet-button">Search the Internet</button>
+            </form>
+        </div>
+
+        <!-- Spotify Search Results, shown only after the button is clicked -->
+        <div class="spotify-results-container" {% if not spotify_results %}style="display:none;"{% endif %}>
+            {% if spotify_results %}
+                <h2>Spotify Search Results:</h2>
+                <div class="results-list">
+                    {% for result in spotify_results %}
+                        <form method="POST" action="{{ url_for('add_to_queue') }}">
+                            <input type="hidden" name="song_name" value="{{ result.name }}">
+                            <input type="hidden" name="artist_name" value="{{ result.artists[0].name }}">
+                            <input type="hidden" name="album_name" value="{{ result.album.name }}">
+                            <input type="hidden" name="spotify_url" value="{{ result.external_urls['spotify'] }}">
+                            <div class="result-item" onclick="this.closest('form').submit();">
+                                <strong>{{ result.name }}</strong><br>
+                                <span class="artist">by: {{ result.artists[0].name }}</span><br>
+                                <span class="album">album: {{ result.album.name }}</span>
+                            </div>
+                        </form>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No results found on Spotify.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Move the search bar to the top only after a search
+        const resultsContainer = document.querySelector('.results-container');
+        const spotifyResultsContainer = document.querySelector('.spotify-results-container');
+        const logo = document.querySelector('.logo');
+        const searchSection = document.querySelector('.search-section');
+
+        if (resultsContainer && resultsContainer.style.display !== 'none') {
+            logo.classList.add('logo-top');
+            searchSection.classList.add('search-bar-top');
+        }
+
+        if (spotifyResultsContainer && spotifyResultsContainer.style.display !== 'none') {
+            logo.classList.add('logo-top');
+            searchSection.classList.add('search-bar-top');
+        }
+
+        function toggleAccordion() {
+            var content = document.querySelector('.accordion-content');
+            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Clicking logo redirects to main page
+        document.querySelector('.logo-text').addEventListener('click', function () {
+            window.location.href = '/';
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BB Karaoke - Download Queue</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <!-- Logo (Fixed at the top) -->
+    <div class="logo">
+        <a href="/" class="logo-text">BB Karaoke</a>
+    </div>
+
+    <!-- Accordion Navigation -->
+    <div class="accordion-nav">
+        <button class="accordion-btn" onclick="toggleAccordion()">☰</button>
+        <div class="accordion-content">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/queue" class="nav-link">Queue</a>
+        </div>
+    </div>
+
+    <!-- Queue (Styled like the search results page) -->
+    <div class="queue-container">
+        <h2>Download Queue:</h2>
+        {% if download_queue %}
+            <div class="results-list">
+                {% for song in download_queue %}
+                    <div class="result-item">
+                        <strong>{{ song['name'] }}</strong><br>
+                        <span class="artist">by: {{ song['artist'] }}</span><br>
+                        <span class="album">album: {{ song['album'] }}</span>
+                        <div class="progress-bar">
+                            <div class="progress" id="progress-{{ loop.index0 }}"></div>
+                        </div>
+                        <form method="POST" action="{{ url_for('remove_from_queue', index=loop.index0) }}">
+                            <button type="submit" class="remove-button">×</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No songs in the queue.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        const queueContainer = document.querySelector('.queue-container');
+        const logo = document.querySelector('.logo');
+
+        if (queueContainer && queueContainer.style.display !== 'none') {
+            logo.classList.add('logo-top');
+        }
+
+        // Toggle function for accordion menu
+        function toggleAccordion() {
+            var content = document.querySelector('.accordion-content');
+            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Function to fetch progress data periodically
+        function fetchProgress() {
+            {% for song in download_queue %}
+                var songIndex = {{ loop.index0 }};
+                fetch('/progress/{{ song["name"] }}/{{ song["artist"] }}/{{ song["album"] }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        var progressElement = document.getElementById('progress-' + songIndex);
+                        progressElement.style.width = (data.progress * 10) + '%';
+                        progressElement.innerText = data.status;
+                    });
+            {% endfor %}
+        }
+
+        // Fetch progress every 5 seconds
+        setInterval(fetchProgress, 5000);
+    </script>
+
+</body>
+</html>

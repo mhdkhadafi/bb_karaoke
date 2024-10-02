@@ -1,0 +1,272 @@
+/* Newake Font Setup */
+@font-face {
+    font-family: 'Newake';
+    src: url('{{ url_for('static', filename='fonts/Newake.otf') }}') format('opentype');
+}
+
+/* Basic Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Logo Styling */
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-text {
+    font-family: 'Newake', sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    color: #000;
+    text-decoration: none;
+}
+
+/* Accordion button styling */
+.accordion-btn {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 24px; /* Increased font size for the "☰" */
+    border-radius: 5px;
+    position: fixed; /* Fixed positioning */
+    top: 10px; /* Top-left corner */
+    left: 10px;
+    z-index: 100; /* Ensure it stays above other content */
+    transition: background-color 0.3s ease;
+}
+
+.accordion-btn:hover {
+    background-color: #555;
+}
+
+/* Accordion content (initially hidden) */
+.accordion-content {
+    display: none;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 65px; /* Positioned just below the button */
+    left: 10px;
+    z-index: 99;
+}
+
+/* Navigation links inside accordion */
+.nav-link {
+    display: block;
+    margin-bottom: 10px;
+    color: #007BFF;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #0056b3;
+}
+
+/* New class for the search section */
+.search-section {
+    position: relative;
+    width: 80%; /* Adjust as needed */
+    margin: 0 auto; /* Center the section */
+    transition: all 0.3s ease;
+}
+
+/* Search Container */
+.search-container {
+    display: flex;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 100%; /* Search bar now takes up full width of the parent */
+    background-color: #fff;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    box-sizing: border-box;
+}
+
+/* Centering and adjusting the input */
+.search-bar input[type="text"] {
+    flex-grow: 1;
+    border: none;
+    border-radius: 50px;
+    padding: 10px;
+    font-size: 18px;
+    outline: none;
+}
+
+.search-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+.search-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Move Search Section to the Top After Search */
+.search-bar-top {
+    position: absolute;
+    top: 80px;
+    width: 80%;
+    transition: all 0.3s ease;
+}
+
+/* Logo adjustments */
+.logo-top {
+    position: absolute;
+    top: 10px;
+    transition: all 0.3s ease;
+}
+
+/* Search Results */
+.results-container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the container */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.internet-search-container {
+    text-align: center;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.search-internet-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-internet-button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling the Spotify search results, similar to local results */
+.spotify-results-container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the container */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.result-item {
+    position: relative; /* For the 'x' button positioning */
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.result-item:hover {
+    background-color: #f0f0f0;
+}
+
+.artist, .album {
+    font-size: smaller;
+    color: #666;
+}
+
+/* Styling the queue page */
+.queue-container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the container */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 60px;
+}
+
+/* Result item remove button ('x') */
+.remove-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    color: #FF6347;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.remove-button:hover {
+    color: #e55347;
+}
+
+/* Progress bar container */
+.progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    margin-top: 10px;
+    height: 20px;
+    position: relative;
+}
+
+/* Progress bar fill */
+.progress {
+    background-color: #4caf50;
+    height: 100%;
+    width: 0;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+    color: white;
+    text-align: center;
+    line-height: 20px; /* Vertically center the text */
+    font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-bar {
+        width: 90%;
+    }
+
+    .results-container {
+        width: 90%;
+    }
+}
