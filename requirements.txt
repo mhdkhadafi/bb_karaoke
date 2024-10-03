@@ -20,36 +20,29 @@ gast==0.6.0
 google-pasta==0.2.0
 grpcio==1.66.2
 h11==0.14.0
-h5py==3.12.1
 httpcore==0.12.3
 httpx==0.16.1
 idna==3.10
 ifaddr==0.2.0
-imageio==2.35.1
 imageio-ffmpeg==0.5.1
 itsdangerous==2.2.0
 Jinja2==3.1.4
 joblib==1.4.2
-keras==3.5.0
 lazy_loader==0.4
 Levenshtein==0.26.0
 libclang==18.1.1
-librespot @ git+https://github.com/kokarare1212/librespot-python.git@ec00f5dbdaaee07d205c50c3a7dc95ff16535a7a
-librosa==0.10.2.post1
 llvmlite==0.43.0
 Markdown==3.7
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
-ml-dtypes==0.4.1
 moviepy==1.0.3
+numpy==2.1.1
 msgpack==1.1.0
 music-tag==0.4.3
 mutagen==1.47.0
 namex==0.0.8
 norbert==0.2.1
-numba==0.60.0
-numpy==2.1.1
 opt_einsum==3.4.0
 optree==0.12.1
 packaging==24.1
@@ -93,4 +86,3 @@ Werkzeug==3.0.4
 wheel==0.44.0
 wrapt==1.16.0
 zeroconf==0.134.0
-zotify @ git+https://zotify.xyz/zotify/zotify.git@08d844fe3e644ae6cd9bea34a3b4982e61129f33
