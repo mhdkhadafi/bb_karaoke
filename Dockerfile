@@ -16,6 +16,10 @@ RUN pipx install https://get.zotify.xyz
 # Set the working directory in the container
 WORKDIR /app
 
+# Set environment variables
+ENV ZOTIFY_USERNAME=$ZOTIFY_USERNAME
+ENV ZOTIFY_AUTHDATA=$ZOTIFY_AUTHDATA
+
 # Copy the requirements file
 COPY requirements.txt .
 
@@ -25,6 +29,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the current directory contents into the container at /app
 COPY . .
 
+# Make the script executable
+RUN chmod +x /app/replace_zotify_credentials.sh
+RUN chmod +x /app/update_zotify_config.sh
+
 # Expose the port that the Flask app runs on (for example, port 5000)
 EXPOSE 5000
 
@@ -32,4 +40,4 @@ EXPOSE 5000
 ENV FLASK_APP=app.py
 
 # Run the application
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["/bin/bash", "-c", "/app/replace_zotify_credentials.sh && /app/update_zotify_config.sh && flask run --host=0.0.0.0"]
