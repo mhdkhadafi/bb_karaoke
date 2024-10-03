@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Define the Zotify config path
-CONFIG_FILE="/home/$USER/.config/zotify/config.json"
+CONFIG_FILE="../root/.config/zotify/config.json"
+
+# ls ../root/
 
 # Update the "CREDENTIALS_LOCATION" key with the value of the environment variable
 if [ -f "$CONFIG_FILE" ]; then

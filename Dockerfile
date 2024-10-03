@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN pipx install https://get.zotify.xyz
 
+# Add /root/.local/bin to PATH so pipx-installed tools are accessible
+ENV PATH="/root/.local/bin:${PATH}"
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -30,6 +33,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Make the script executable
+# Ensure the directory and file have the correct permissions
+RUN chmod -R 755 /root/.config/zotify/config.json
 RUN chmod +x /app/replace_zotify_credentials.sh
 RUN chmod +x /app/update_zotify_config.sh
 
