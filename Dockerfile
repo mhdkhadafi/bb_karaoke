@@ -33,10 +33,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Make the script executable
-# Ensure the directory and file have the correct permissions
-RUN chmod -R 755 /root/.config/zotify/config.json
 RUN chmod +x /app/replace_zotify_credentials.sh
-RUN chmod +x /app/update_zotify_config.sh
 
 # Expose the port that the Flask app runs on (for example, port 5000)
 EXPOSE 5000
@@ -45,4 +42,4 @@ EXPOSE 5000
 ENV FLASK_APP=app.py
 
 # Run the application
-CMD ["/bin/bash", "-c", "/app/replace_zotify_credentials.sh && /app/update_zotify_config.sh && flask run --host=0.0.0.0"]
+CMD ["/bin/bash", "-c", "/app/replace_zotify_credentials.sh && flask run --host=0.0.0.0"]
