@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import track_downloader
-import karaoke_video_maker
+import web.track_downloader as track_downloader
+import web.karaoke_video_maker as karaoke_video_maker
 import os
 import sys
 

@@ -1,8 +1,16 @@
 version: '3'
 services:
   web:
-    build: .
+    build: web/.
     ports:
       - "5001:5000"
+    volumes:
+      - ./shared:/app/shared  # Shared volume for file access
     env_file:
       - .env
+  spleeter:
+    build: spleeter/.
+    ports:
+      - "5002:5002"  # Expose the API port
+    volumes:
+      - ./shared:/app/shared  # Shared volume for file access
