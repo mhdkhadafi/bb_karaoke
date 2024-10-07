@@ -12,9 +12,22 @@ services:
       - .env
     depends_on:
       - spleeter
+      - celery_worker
+      - redis
   spleeter:
     build: spleeter/.
     ports:
       - "5001:5001"  # Expose the API port
     volumes:
       - ./shared:/app/shared  # Shared volume for file access
+  celery_worker:
+    build: web/.  # Reuse the same image, but run Celery worker instead of the web app
+    command: celery -A karaoke_project worker --loglevel=info
+    environment:
+      - BROKER_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"

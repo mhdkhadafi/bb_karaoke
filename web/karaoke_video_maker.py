@@ -9,6 +9,7 @@ import re
 import sys
 from app_db import update_progress
 import requests
+from .celery import app
 
 def rename_file_without_special_chars(file_path):
     # Replace problematic characters (e.g., single quotes)
@@ -117,6 +118,7 @@ def embed_subtitles(video_path, main_srt, after_srt, output_path, song_name, art
     subprocess.run(['rm', temp_output_1])
 
 # Main function to execute the process
+@app.task
 def create_karaoke(artist_name, album_name, song_name):
     # base_path = os.path.join("input", artist, album, f"{artist}")
     # # Extract artist, album, and song names from the path

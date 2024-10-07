@@ -5,6 +5,7 @@ from track_downloader import search_spotify, run_download_process
 from karaoke_video_maker import create_karaoke
 from app_db import update_progress, init_db
 import sqlite3
+from .celery import app
 
 app = Flask(__name__)
 init_db()
@@ -101,7 +102,16 @@ def search_songs(query, limit=5):
         return best_matches
     return []
 
+# Task to pop the song from the queue after the tasks complete
+@app.task
+def pop_download_queue(song_name):
+    # Pop the first song from the queue
+    if download_queue:
+        print(f"Removing {song_name} from the queue")
+        download_queue.pop(0)
+
 # Function to process the queue automatically
+@app.task
 def process_queue():
     while download_queue:
         # Get the first song from the queue
@@ -111,21 +121,27 @@ def process_queue():
         song_name = song['name']
         url = song['spotify_url']
 
-        try:
-            # Step 1: Download the song
-            run_download_process(artist_name, album_name, song_name, url)
+        chain = (
+            run_download_process.s(artist_name, album_name, song_name, url) |
+            create_karaoke.s(artist_name, album_name, song_name) |
+            pop_download_queue.s(song_name)  # Task to pop from queue
+        )
+        chain()
+        # try:
+        #     # Step 1: Download the song
+        #     run_download_process.delay(artist_name, album_name, song_name, url)
 
-            # Step 2: Create the karaoke video
-            create_karaoke(artist_name, album_name, song_name)
+        #     # Step 2: Create the karaoke video
+        #     create_karaoke.delay(artist_name, album_name, song_name)
 
-            update_progress(song_name, artist_name, album_name, 10, "Completed")
+        #     update_progress(song_name, artist_name, album_name, 10, "Completed")
 
-            # Remove the song from the queue after processing
-            download_queue.pop(0)
+        #     # Remove the song from the queue after processing
+        #     download_queue.pop(0)
 
-        except Exception as e:
-            print(f"Error processing the song: {e}")
-            break  # Stop processing on error
+        # except Exception as e:
+        #     print(f"Error processing the song: {e}")
+        #     break  # Stop processing on error
 
 if __name__ == '__main__':
     app.run(debug=True)

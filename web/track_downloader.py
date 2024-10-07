@@ -7,19 +7,21 @@ from spotipy.oauth2 import SpotifyOAuth
 import pathlib
 import requests
 from app_db import update_progress
+from .celery import app
 
 # Authenticate with Spotify using Spotipy
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     scope="user-library-read",
     client_id=os.getenv("SPOTIPY_CLIENT_ID"),
     client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
-    redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI")
+    redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
+    cache_path="/app/.cache"
 ))
 
 # Function to search for a song
 def search_spotify(search_term):
     # Search for the song on Spotify
-    results = sp.search(q=search_term, type='track', limit=5)
+    results = sp.search(q='hot to go', type='track', limit=5)
 
     # Collect the relevant track data
     tracks = []
@@ -122,6 +124,7 @@ def download_lyrics(artist_name, album_name, song_name):
         return None
 
 # Main function to run the full process
+@app.task
 def run_download_process(artist_name, album_name, song_name, url):
     # artist_name, album_name, song_name, url = search_spotify(search_term)
 
