@@ -8,6 +8,7 @@ import os
 import re
 import sys
 from app_db import update_progress
+import requests
 
 def rename_file_without_special_chars(file_path):
     # Replace problematic characters (e.g., single quotes)
@@ -19,6 +20,15 @@ def remove_audio(video_path):
     video = mp.VideoFileClip(video_path)
     video_without_audio = video.without_audio()
     return video_without_audio
+
+def remove_vocals(audio_path):
+    spleeter_api_url = "http://spleeter:5001/split"
+    response = requests.post(spleeter_api_url, json={"file_path": "/app/shared/audio_file.mp3"})
+
+    if response.status_code == 200:
+        print("Audio processed successfully!")
+    else:
+        print(f"Error: {response.json()}")
 
 # Step 2: Add .ogg audio to the video
 def add_audio(video_path, audio_path, output_path):
