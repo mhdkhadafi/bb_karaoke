@@ -4,8 +4,10 @@ services:
     build: web/.
     ports:
       - "5000:5000"
+      - "8888:8888"
     volumes:
       - ./shared:/app/shared  # Shared volume for file access
+      - ./spotify_cache:/app/.cache  # Mount the local cache into the container
     env_file:
       - .env
     depends_on:

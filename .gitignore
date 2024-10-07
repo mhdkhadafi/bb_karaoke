@@ -38,3 +38,4 @@ output/*
 
 # env
 .env
+spotify_cache
