@@ -36,25 +36,6 @@ def search_spotify(search_term):
 
     return tracks
 
-    # # Print search results and let the user select a song
-    # print("Select a song to download:")
-    # for i, track in enumerate(results['tracks']['items']):
-    #     print(f"{i + 1}: {track['name']} by {[artist['name'] for artist in track['artists']]} - Album: {track['album']['name']}")
-    
-    # selection = int(input("Enter the number of the song: ")) - 1
-    # selected_track = results['tracks']['items'][selection]
-    
-    # # Get the track URL and other metadata
-    # track_url = selected_track['external_urls']['spotify']
-    # track_name = selected_track['name']
-    # track_album = selected_track['album']['name']
-    # track_artist = selected_track['artists'][0]['name']
-    
-    # print(f"Selected song: {track_name}")
-    # print(f"Spotify URL: {track_url}")
-    
-    # return track_artist, track_album, track_name, track_url
-
 # Step 1: Search and download audio file using Zotify
 def download_audio(spotify_url):
     # Run zotify search command as a subprocess
@@ -62,11 +43,11 @@ def download_audio(spotify_url):
         ['zotify', spotify_url, 
          '--download-lyrics', 'False',
          '--root-path', str(pathlib.Path().resolve()),
-         '--output', 'input/{artist}/{album}/{artist} - {song_name}.{ext}']
+         '--output', 'shared/input/{artist}/{album}/{artist} - {song_name}.{ext}']
         )
     
 def download_video(artist, album, song_name):
-    base_path = pathlib.Path("input") / artist / album
+    base_path = pathlib.Path("shared/input") / artist / album
     video_file_path = base_path / f"{artist} - {song_name}.webm"
 
     # Skip download if the video file already exists
@@ -90,7 +71,7 @@ def download_video(artist, album, song_name):
 
 # Step 3: Download lyrics using lrclib API
 def download_lyrics(artist_name, album_name, song_name):
-    base_path = pathlib.Path("input") / artist_name / album_name
+    base_path = pathlib.Path("shared/input") / artist_name / album_name
     lrc_file_path = base_path / f"{artist_name} - {song_name}.lrc"
     search_term = f"{artist_name} {song_name}"
 

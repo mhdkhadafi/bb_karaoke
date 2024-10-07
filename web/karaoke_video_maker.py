@@ -10,6 +10,7 @@ import sys
 from app_db import update_progress
 import requests
 from celery_app import app as celery_app
+import time
 
 def rename_file_without_special_chars(file_path):
     # Replace problematic characters (e.g., single quotes)
@@ -22,22 +23,41 @@ def remove_audio(video_path):
     video_without_audio = video.without_audio()
     return video_without_audio
 
-def remove_vocals(audio_path):
+def remove_vocals(audio_path, accompaniment_file):
     spleeter_api_url = "http://spleeter:5001/split"
-    response = requests.post(spleeter_api_url, json={"file_path": "/app/shared/audio_file.mp3"})
+    response = requests.post(spleeter_api_url, json={"file_path": audio_path, "output_path": accompaniment_file})
 
     if response.status_code == 200:
-        print("Audio processed successfully!")
+        print("Spleeter separation successful! Waiting for the output file...")
+        
+        # Wait for the accompaniment file to be created (polling)
+        for _ in range(60):  # Wait for up to 60 seconds
+            if os.path.exists(accompaniment_file):
+                return accompaniment_file
+            time.sleep(1)  # Wait for 1 second before checking again
+        
+        raise Exception(f"Accompaniment file not found: {accompaniment_file}")
     else:
-        print(f"Error: {response.json()}")
+        raise Exception(f"Spleeter error: {response.json().get('error')}")
 
 # Step 2: Add .ogg audio to the video
-def add_audio(video_path, audio_path, output_path):
+def add_audio(video_file, audio_with_vocals, audio_without_vocals, output_file):
     command = [
-        'ffmpeg', '-i', video_path, '-i', audio_path, 
-        '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', '-strict', 'experimental', '-map', '0:v', '-map', '1:a', output_path
+        'ffmpeg',
+        '-i', video_file,                     # Input video
+        '-i', audio_with_vocals,              # First audio track (with vocals)
+        '-i', audio_without_vocals,           # Second audio track (without vocals)
+        '-map', '0:v',                        # Map video stream
+        '-map', '1:a',                        # Map first audio stream
+        '-map', '2:a',                        # Map second audio stream
+        '-c:v', 'copy',                       # Copy video stream without re-encoding
+        '-c:a', 'aac',                        # Encode audio to AAC
+        '-strict', 'experimental',            # Enable experimental features for aac
+        '-shortest',                          # Make sure the video and audio streams match length
+        output_file                           # Output file
     ]
-    subprocess.run(command)
+    
+    subprocess.run(command, check=True)
 
 # Step 3: Convert .lrc file to .srt for subtitle embedding
 def time_to_milliseconds(lrc_time):
@@ -128,8 +148,8 @@ def create_karaoke(artist_name, album_name, song_name):
     #     raise ValueError("Invalid path format. Expected 'input/<artist_name>/<album_name>/<song_name>'.")
 
     # Define input and output paths
-    input_folder = os.path.join("input", artist_name, album_name)
-    output_folder = os.path.join("output", artist_name, album_name)
+    input_folder = os.path.join("shared", "input", artist_name, album_name)
+    output_folder = os.path.join("shared", "output", artist_name, album_name)
     os.makedirs(output_folder, exist_ok=True)
 
     video_file = os.path.join(input_folder, f"{artist_name} - {song_name}.webm")
@@ -147,6 +167,7 @@ def create_karaoke(artist_name, album_name, song_name):
     temp_srt_file = f"{artist_name}_{album_name}_{song_name}_subtitles.srt"
     temp_main_srt_file = rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_main.srt")
     temp_after_srt_file = rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_after.srt")
+    temp_accompaniment_file = os.path.join(output_folder, f"{artist_name}_{album_name}_{song_name}_accompaniment.wav")
 
     # Step 1: Remove audio from video
     update_progress(song_name, artist_name, album_name, 4, "Removing Audio")
@@ -155,7 +176,8 @@ def create_karaoke(artist_name, album_name, song_name):
 
     # Step 2: Add .ogg audio to video
     update_progress(song_name, artist_name, album_name, 5, "Adding Audio")
-    add_audio(temp_video_no_audio, audio_file, temp_video_subtitles)
+    remove_vocals(audio_file, temp_accompaniment_file)
+    add_audio(temp_video_no_audio, audio_file, temp_accompaniment_file, temp_video_subtitles)
 
     # Step 3: Convert .lrc to .srt
     update_progress(song_name, artist_name, album_name, 6, "Converting Lyrics to SRT")
