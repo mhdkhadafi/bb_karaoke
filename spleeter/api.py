@@ -1,13 +1,11 @@
-from fastapi import FastAPI
-import os
-import subprocess
-from pydantic import BaseModel
+import asyncio
 import shutil
 from pathlib import Path
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-# Define a model for the expected request body
 class AudioRequest(BaseModel):
     file_path: str
     accompaniment_file: str
@@ -19,11 +17,28 @@ async def split_audio(request: AudioRequest):
     accompaniment_file = request.accompaniment_file
     track_name = Path(file_path).stem
     directory_name = Path(file_path).parent
-    command = f"spleeter separate -p spleeter:2stems -o {directory_name} {file_path}"
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    shutil.move(f'{directory_name}/{track_name}/accompaniment.wav', accompaniment_file)
 
-    if result.returncode == 0:
-        return {"message": "Audio split successfully!"}
+    # Use asyncio to run the Spleeter command asynchronously
+    command = [
+        "spleeter", "separate", "-p", "spleeter:2stems", "-o", str(directory_name), str(file_path)
+    ]
+
+    # Start the subprocess asynchronously
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+
+    # Wait for the subprocess to complete
+    stdout, stderr = await process.communicate()
+
+    if process.returncode == 0:
+        # Move the accompaniment file after the subprocess has finished
+        try:
+            shutil.move(f'{directory_name}/{track_name}/accompaniment.wav', accompaniment_file)
+            return {"message": "Audio split successfully!"}
+        except Exception as e:
+            return {"message": "Error moving accompaniment file", "details": str(e)}
     else:
-        return {"message": "Error during audio split", "details": result.stderr}
+        return {"message": "Error during audio split", "details": stderr.decode()}
