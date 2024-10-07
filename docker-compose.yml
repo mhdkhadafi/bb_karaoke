@@ -11,21 +11,17 @@ services:
     env_file:
       - .env
     depends_on:
-      - spleeter
       - celery_worker
       - redis
-  spleeter:
-    build: spleeter/.
-    ports:
-      - "5001:5001"  # Expose the API port
-    volumes:
-      - ./shared:/app/shared  # Shared volume for file access
   celery_worker:
     build: web/.  # Reuse the same image, but run Celery worker instead of the web app
     command: /bin/bash -c "/app/replace_zotify_credentials.sh && celery -A celery_app worker --loglevel=info"
+    mem_limit: 2g
+    cpus: "1.0"
     volumes:
       - ./shared:/app/shared  # Shared volume for file access
       - ./spotify_cache:/app/.cache
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - .env
     depends_on:
@@ -34,3 +30,9 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+  spleeter:
+    build: spleeter/.
+    ports:
+      - "5001:5001"  # Expose the API port
+    volumes:
+      - ./shared:/app/shared  # Shared volume for file access

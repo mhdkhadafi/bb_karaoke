@@ -40,6 +40,15 @@ def remove_vocals(audio_path, accompaniment_file):
     else:
         raise Exception(f"Spleeter error: {response.json().get('error')}")
 
+def remove_vocals_2(input_file, output_folder):
+    command = [
+        "docker", "run", "--rm",
+        "-v", f"{input_file}:/app/input",
+        "-v", f"{output_folder}:/app/output",
+        "deezer/spleeter", "separate", "-i", "/app/input", "-o", "/app/output"
+    ]
+    subprocess.run(command, check=True)
+
 # Step 2: Add .ogg audio to the video
 def add_audio(video_file, audio_with_vocals, audio_without_vocals, output_file):
     command = [
