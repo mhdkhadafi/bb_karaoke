@@ -25,7 +25,7 @@ def remove_audio(video_path):
 
 def remove_vocals(audio_path, accompaniment_file):
     spleeter_api_url = "http://spleeter:5001/split"
-    response = requests.post(spleeter_api_url, json={"file_path": audio_path, "output_path": accompaniment_file})
+    response = requests.post(spleeter_api_url, json={"file_path": audio_path, "accompaniment_file": accompaniment_file})
 
     if response.status_code == 200:
         print("Spleeter separation successful! Waiting for the output file...")

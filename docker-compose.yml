@@ -23,6 +23,9 @@ services:
   celery_worker:
     build: web/.  # Reuse the same image, but run Celery worker instead of the web app
     command: /bin/bash -c "/app/replace_zotify_credentials.sh && celery -A celery_app worker --loglevel=info"
+    volumes:
+      - ./shared:/app/shared  # Shared volume for file access
+      - ./spotify_cache:/app/.cache
     env_file:
       - .env
     depends_on:
