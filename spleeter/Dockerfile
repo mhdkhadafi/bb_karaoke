@@ -1,6 +1,9 @@
 # Extend the base spleeter image
 FROM deezer/spleeter:3.8
 
+# Set the working directory
+WORKDIR /app
+
 # Copy the FastAPI app into the Spleeter container
 COPY api.py /app/api.py
 
