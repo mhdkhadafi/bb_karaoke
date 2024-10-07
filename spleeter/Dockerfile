@@ -11,4 +11,4 @@ COPY api.py /app/api.py
 RUN pip install fastapi uvicorn
 
 # Set the entrypoint to run the FastAPI server
-ENTRYPOINT ["python3", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "5002"]
+ENTRYPOINT ["python3", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "5001"]
