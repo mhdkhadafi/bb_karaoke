@@ -32,6 +32,11 @@ input/*
 output/*
 !input/.gitkeep 
 !output/.gitkeep 
+shared/*
+shared/input/*
+shared/output/*
+!shared/input/.gitkeep
+!shared/output/.gitkeep
 
 # db
 *.db

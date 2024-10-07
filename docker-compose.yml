@@ -22,9 +22,9 @@ services:
       - ./shared:/app/shared  # Shared volume for file access
   celery_worker:
     build: web/.  # Reuse the same image, but run Celery worker instead of the web app
-    command: celery -A karaoke_project worker --loglevel=info
-    environment:
-      - BROKER_URL=redis://redis:6379/0
+    command: /bin/bash -c "/app/replace_zotify_credentials.sh && celery -A celery_app worker --loglevel=info"
+    env_file:
+      - .env
     depends_on:
       - redis
   redis:

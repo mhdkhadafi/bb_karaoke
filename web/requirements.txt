@@ -6,3 +6,4 @@ pysrt==1.1.2
 requests==2.32.3
 spotipy==2.24.0
 python-Levenshtein==0.26.0
+celery[redis]

@@ -7,7 +7,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import pathlib
 import requests
 from app_db import update_progress
-from .celery import app
+from celery_app import app as celery_app
 
 # Authenticate with Spotify using Spotipy
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -21,7 +21,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
 # Function to search for a song
 def search_spotify(search_term):
     # Search for the song on Spotify
-    results = sp.search(q='hot to go', type='track', limit=5)
+    results = sp.search(q=search_term, type='track', limit=5)
 
     # Collect the relevant track data
     tracks = []
@@ -76,8 +76,12 @@ def download_video(artist, album, song_name):
     
     print(f"Downloading video for: {song_name}...")
     command = [
-        'yt-dlp', f"ytsearch:{artist} {song_name}", 
-        '-f', 'bestvideo[ext=webm]', '-o', str(video_file_path)
+        "yt-dlp",
+        "--cookies", "cookies.txt",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "-f", "bestvideo[ext=webm]",
+        "-o", str(video_file_path),
+        f"ytsearch:{artist} {song_name}"
     ]
     subprocess.run(command)
     
@@ -124,7 +128,7 @@ def download_lyrics(artist_name, album_name, song_name):
         return None
 
 # Main function to run the full process
-@app.task
+@celery_app.task
 def run_download_process(artist_name, album_name, song_name, url):
     # artist_name, album_name, song_name, url = search_spotify(search_term)
 

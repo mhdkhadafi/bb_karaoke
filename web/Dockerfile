@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pipx install https://get.zotify.xyz
+RUN pipx install yt-dlp
 
 # Add /root/.local/bin to PATH so pipx-installed tools are accessible
 ENV PATH="/root/.local/bin:${PATH}"

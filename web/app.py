@@ -5,7 +5,7 @@ from track_downloader import search_spotify, run_download_process
 from karaoke_video_maker import create_karaoke
 from app_db import update_progress, init_db
 import sqlite3
-from .celery import app
+from celery_app import app as celery_app
 
 app = Flask(__name__)
 init_db()
@@ -103,7 +103,7 @@ def search_songs(query, limit=5):
     return []
 
 # Task to pop the song from the queue after the tasks complete
-@app.task
+@celery_app.task
 def pop_download_queue(song_name):
     # Pop the first song from the queue
     if download_queue:
@@ -111,7 +111,7 @@ def pop_download_queue(song_name):
         download_queue.pop(0)
 
 # Function to process the queue automatically
-@app.task
+@celery_app.task
 def process_queue():
     while download_queue:
         # Get the first song from the queue
