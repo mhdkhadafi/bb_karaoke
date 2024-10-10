@@ -55,13 +55,14 @@ def download_video(artist, album, song_name):
         print(f"Video file already exists: {video_file_path}. Skipping download.")
         return video_file_path
     
+    po_token = os.getenv('PO_TOKEN')
     print(f"Downloading video for: {song_name}...")
     command = [
         "yt-dlp",
-        "--cookies", "cookies.txt",
-        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         "-f", "bestvideo[ext=webm]",
         "-o", str(video_file_path),
+        "--extractor-args", f"youtube:player-client=web,default;po_token=web+{po_token}",
+        "--cookies", "cookies.txt",
         f"ytsearch:{artist} {song_name}"
     ]
     subprocess.run(command)

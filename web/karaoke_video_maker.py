@@ -205,40 +205,31 @@ def create_karaoke(artist_name, album_name, song_name):
         raise FileNotFoundError("One or more input files are missing (webm, ogg, lrc).")
 
     # Generate unique temporary filenames based on artist, album, and song name
-    temp_video_no_audio = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_temp_no_audio.webm")
-    temp_video_subtitles = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_temp_subtitles.mp4")
     temp_srt_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_subtitles.srt")
     temp_main_srt_file = os.path.join(input_folder, kvm.rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_main.srt"))
     temp_after_srt_file = os.path.join(input_folder, kvm.rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_after.srt"))
     temp_accompaniment_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_accompaniment.wav")
     original_accompaniment_file = os.path.join(input_folder, f"{artist_name} - {song_name}", 'accompaniment.wav')
 
-    # Step 1: Remove audio from video
-    update_progress(song_name, artist_name, album_name, 4, "Removing Audio")
-    video_no_audio = remove_audio(video_file)
-    video_no_audio.write_videofile(temp_video_no_audio)
-
-    # Step 2: Add .ogg audio to video
-    update_progress(song_name, artist_name, album_name, 5, "Adding Audio")
+    # Step 1: Add .ogg audio to video
+    update_progress(song_name, artist_name, album_name, 4, "Adding Audio")
     remove_vocals(audio_file, input_folder)
     shutil.move(original_accompaniment_file, temp_accompaniment_file)
-    # add_audio(temp_video_no_audio, audio_file, temp_accompaniment_file, temp_video_subtitles)
-    # add_audio(temp_video_no_audio, temp_accompaniment_file, temp_video_subtitles)
 
-    # Step 3: Convert .lrc to .srt
-    update_progress(song_name, artist_name, album_name, 6, "Converting Lyrics to SRT")
+    # Step 2: Convert .lrc to .srt
+    update_progress(song_name, artist_name, album_name, 5, "Converting Lyrics to SRT")
     lrc_to_srt(lrc_file, temp_srt_file)
 
-    # Step 3.5: Split the SRT into main and after
-    update_progress(song_name, artist_name, album_name, 7, "Splitting Subtitles")
+    # Step 3: Split the SRT into main and after
+    update_progress(song_name, artist_name, album_name, 6, "Splitting Subtitles")
     split_srt_to_two(temp_srt_file, temp_main_srt_file, temp_after_srt_file)
-
-    create_video(temp_video_no_audio, audio_file, temp_accompaniment_file, temp_main_srt_file, temp_after_srt_file, output_file)
-    # Step 4: Embed the converted subtitles (main and after) into the video
-    # embed_subtitles(temp_video_subtitles, temp_main_srt_file, temp_after_srt_file, output_file, song_name, artist_name, album_name)
+    
+    # Step 4: Create Video
+    update_progress(song_name, artist_name, album_name, 7, "Creating Karaoke Video")
+    create_video(video_file, audio_file, temp_accompaniment_file, temp_main_srt_file, temp_after_srt_file, output_file)
 
     # # Clean up temporary files
-    for temp_file in [temp_video_no_audio, temp_video_subtitles, temp_srt_file, temp_main_srt_file, temp_after_srt_file, temp_accompaniment_file]:
+    for temp_file in [temp_srt_file, temp_main_srt_file, temp_after_srt_file, temp_accompaniment_file]:
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
