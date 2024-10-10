@@ -131,6 +131,29 @@ def split_srt_to_two(srt_path, main_srt_path, after_srt_path):
     main_subs.save(main_srt_path)
     after_subs.save(after_srt_path)
 
+def create_video(video_file, audio_with_vocals, audio_without_vocals, main_srt, after_srt, output_file):
+    font = "Arial Unicode MS"
+
+    command = [
+        'ffmpeg',
+        '-i', video_file,                     # Input video (VP8 in WebM)
+        '-i', audio_with_vocals,              # First audio track (with vocals)
+        '-i', audio_without_vocals,           # Second audio track (without vocals)
+        '-map', '0:v',                        # Map video stream
+        '-map', '1:a',                        # Map first audio stream (with vocals)
+        '-map', '2:a',                        # Map second audio stream (without vocals)
+        '-vf', f"[0:v]subtitles={main_srt}:force_style='Fontname={font},Fontsize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=30'," \
+            f"subtitles={after_srt}:force_style='Fontname={font},Fontsize=18,PrimaryColour=&H00808080,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=10'[out]",
+        '-c:v', 'libx264',                    # Re-encode video to H.264 for MP4 compatibility
+        '-c:a', 'aac',                        # Encode audio to AAC
+        '-strict', 'experimental',            # Enable experimental features for AAC
+        '-shortest',                          # Ensure video and audio match length
+        '-preset', 'ultrafast',               # Speed up encoding
+        output_file                           # Output file
+    ]
+
+    subprocess.run(command, check=True)
+
 # Step 4: Embed subtitles into the video with the desired styling
 def embed_subtitles(video_path, main_srt, after_srt, output_path, song_name, artist_name, album_name):
     temp_output_1 = f"{output_path}_temp_main.mp4"
@@ -200,7 +223,7 @@ def create_karaoke(artist_name, album_name, song_name):
     remove_vocals(audio_file, input_folder)
     shutil.move(original_accompaniment_file, temp_accompaniment_file)
     # add_audio(temp_video_no_audio, audio_file, temp_accompaniment_file, temp_video_subtitles)
-    add_audio(temp_video_no_audio, temp_accompaniment_file, temp_video_subtitles)
+    # add_audio(temp_video_no_audio, temp_accompaniment_file, temp_video_subtitles)
 
     # Step 3: Convert .lrc to .srt
     update_progress(song_name, artist_name, album_name, 6, "Converting Lyrics to SRT")
@@ -210,11 +233,12 @@ def create_karaoke(artist_name, album_name, song_name):
     update_progress(song_name, artist_name, album_name, 7, "Splitting Subtitles")
     split_srt_to_two(temp_srt_file, temp_main_srt_file, temp_after_srt_file)
 
+    create_video(temp_video_no_audio, audio_file, temp_accompaniment_file, temp_main_srt_file, temp_after_srt_file, output_file)
     # Step 4: Embed the converted subtitles (main and after) into the video
-    embed_subtitles(temp_video_subtitles, temp_main_srt_file, temp_after_srt_file, output_file, song_name, artist_name, album_name)
+    # embed_subtitles(temp_video_subtitles, temp_main_srt_file, temp_after_srt_file, output_file, song_name, artist_name, album_name)
 
     # # Clean up temporary files
-    for temp_file in [temp_video_no_audio, temp_video_subtitles, temp_srt_file, temp_main_srt_file, temp_after_srt_file]:
+    for temp_file in [temp_video_no_audio, temp_video_subtitles, temp_srt_file, temp_main_srt_file, temp_after_srt_file, temp_accompaniment_file]:
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
