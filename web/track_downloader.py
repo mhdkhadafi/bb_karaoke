@@ -7,7 +7,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import pathlib
 import requests
 from app_db import update_progress
-from celery_app import app as celery_app
+from celery_app import celery_app
 
 # Authenticate with Spotify using Spotipy
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(

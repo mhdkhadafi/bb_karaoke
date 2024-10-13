@@ -9,7 +9,7 @@ import re
 import sys
 from app_db import update_progress
 import requests
-from celery_app import app as celery_app
+from celery_app import celery_app
 import time
 import shutil
 
@@ -206,8 +206,8 @@ def create_karaoke(artist_name, album_name, song_name):
 
     # Generate unique temporary filenames based on artist, album, and song name
     temp_srt_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_subtitles.srt")
-    temp_main_srt_file = os.path.join(input_folder, kvm.rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_main.srt"))
-    temp_after_srt_file = os.path.join(input_folder, kvm.rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_after.srt"))
+    temp_main_srt_file = os.path.join(input_folder, rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_main.srt"))
+    temp_after_srt_file = os.path.join(input_folder, rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_after.srt"))
     temp_accompaniment_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_accompaniment.wav")
     original_accompaniment_file = os.path.join(input_folder, f"{artist_name} - {song_name}", 'accompaniment.wav')
 

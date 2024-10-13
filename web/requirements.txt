@@ -7,3 +7,6 @@ requests==2.32.3
 spotipy==2.24.0
 python-Levenshtein==0.26.0
 celery[redis]
+Flask_SQLAlchemy
+Flask_Migrate
+psycopg2-binary

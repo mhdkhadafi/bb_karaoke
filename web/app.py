@@ -1,17 +1,27 @@
 from flask import Flask, request, render_template, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from extensions import db
+from flask_migrate import Migrate
 import os
 from fuzzywuzzy import process
 from track_downloader import search_spotify, run_download_process
 from karaoke_video_maker import create_karaoke
 from app_db import update_progress, init_db
 import sqlite3
-from celery_app import app as celery_app
+from celery_app import celery_app
 
 app = Flask(__name__)
-init_db()
 
-# In-memory queue to store songs
-download_queue = []
+# Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')  # From environment variables
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize database and migration objects
+db.init_app(app)
+migrate = Migrate(app, db)
+
+# Import your models
+from models import SongQueue
 
 # Set up the path where the output files are stored
 OUTPUT_DIR = "output"
@@ -21,7 +31,7 @@ OUTPUT_DIR = "output"
 def index():
     search_results = []
     spotify_results = []
-    
+
     # Local search (POST request)
     if request.method == 'POST' and 'search' in request.form:
         search_query = request.form.get('search')
@@ -46,8 +56,8 @@ def add_to_queue():
     download_queue.append(song)
     
     # Start processing the queue automatically if there's at least one song
-    if download_queue:
-        process_queue()
+    if len(download_queue) == 1:
+        process_queue.delay()
 
     return redirect(url_for('queue'))
 
@@ -110,10 +120,14 @@ def pop_download_queue(song_name):
         print(f"Removing {song_name} from the queue")
         download_queue.pop(0)
 
+    # After popping, check if there are more songs
+    if download_queue:
+        process_queue.delay()
+
 # Function to process the queue automatically
-@celery_app.task
+@celery_app.task(name='process_queue')
 def process_queue():
-    while download_queue:
+    if download_queue:
         # Get the first song from the queue
         song = download_queue[0]
         artist_name = song['artist']
@@ -123,25 +137,17 @@ def process_queue():
 
         chain = (
             run_download_process.s(artist_name, album_name, song_name, url) |
-            create_karaoke.s(artist_name, album_name, song_name) |
-            pop_download_queue.s(song_name)  # Task to pop from queue
+            create_karaoke.si(artist_name, album_name, song_name) |
+            pop_download_queue.si(song_name)  # Task to pop from queue
         )
-        chain()
-        # try:
-        #     # Step 1: Download the song
-        #     run_download_process.delay(artist_name, album_name, song_name, url)
 
-        #     # Step 2: Create the karaoke video
-        #     create_karaoke.delay(artist_name, album_name, song_name)
+        # Link an error handling task to pop the queue if any task fails
+        chain.link_error(pop_download_queue.s(song_name))
 
-        #     update_progress(song_name, artist_name, album_name, 10, "Completed")
-
-        #     # Remove the song from the queue after processing
-        #     download_queue.pop(0)
-
-        # except Exception as e:
-        #     print(f"Error processing the song: {e}")
-        #     break  # Stop processing on error
+        chain.apply_async()
+    else:
+        # Queue is empty, do nothing
+        pass
 
 if __name__ == '__main__':
     app.run(debug=True)
