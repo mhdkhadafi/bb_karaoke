@@ -47,7 +47,7 @@ RUN chmod +x /app/replace_zotify_credentials.sh
 EXPOSE 5000
 
 # Define environment variable for Flask app
-ENV FLASK_APP=app.py
+ENV FLASK_APP="app:create_app()"
 
 # Run the application
 CMD ["/bin/bash", "-c", "/app/replace_zotify_credentials.sh && flask run --host=0.0.0.0"]

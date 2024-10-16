@@ -24,7 +24,7 @@ def remove_audio(video_path):
     video_without_audio = video.without_audio()
     return video_without_audio
 
-def remove_vocals(input_file, output_folder):
+def remove_vocals(input_file, output_folder, output_file):
     volume_path = "/home/ec2-user/bb_karaoke/shared"
     command = [
         "docker", "run", 
@@ -36,6 +36,14 @@ def remove_vocals(input_file, output_folder):
     ]
 
     subprocess.run(command, check=True)
+
+    # Move the accompaniment file to the desired output file
+    original_accompaniment_file = os.path.join(
+        os.path.dirname(output_folder), 
+        os.path.splitext(os.path.basename(input_file))[0], 
+        'accompaniment.wav'
+    )
+    shutil.move(original_accompaniment_file, output_file)
 
 # Step 3: Convert .lrc file to .srt for subtitle embedding
 def time_to_milliseconds(lrc_time):
@@ -112,61 +120,3 @@ def create_video(video_file, audio_with_vocals, audio_without_vocals, main_srt, 
     ]
 
     subprocess.run(command, check=True)
-
-# Main function to execute the process
-@celery_app.task
-def create_karaoke(artist_name, album_name, song_name):
-    # Define input and output paths
-    input_folder = os.path.join("shared", "input", artist_name, album_name)
-    output_folder = os.path.join("shared", "output", artist_name, album_name)
-    os.makedirs(output_folder, exist_ok=True)
-
-    video_file = os.path.join(input_folder, f"{artist_name} - {song_name}.webm")
-    audio_file = os.path.join(input_folder, f"{artist_name} - {song_name}.ogg")
-    lrc_file = os.path.join(input_folder, f"{artist_name} - {song_name}.lrc")
-    output_file = os.path.join(output_folder, f"{artist_name} - {song_name}.mp4")
-
-    # Check if all necessary files exist
-    if not all([os.path.exists(video_file), os.path.exists(audio_file), os.path.exists(lrc_file)]):
-        raise FileNotFoundError("One or more input files are missing (webm, ogg, lrc).")
-
-    # Generate unique temporary filenames based on artist, album, and song name
-    temp_srt_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_subtitles.srt")
-    temp_main_srt_file = os.path.join(input_folder, rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_main.srt"))
-    temp_after_srt_file = os.path.join(input_folder, rename_file_without_special_chars(f"{artist_name}_{album_name}_{song_name}_after.srt"))
-    temp_accompaniment_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_accompaniment.wav")
-    original_accompaniment_file = os.path.join(input_folder, f"{artist_name} - {song_name}", 'accompaniment.wav')
-
-    # Step 1: Remove vocals from audio
-    update_progress(song_name, artist_name, album_name, 4, "Adding Audio")
-    remove_vocals(audio_file, input_folder)
-    shutil.move(original_accompaniment_file, temp_accompaniment_file)
-
-    # Step 2: Convert .lrc to .srt
-    update_progress(song_name, artist_name, album_name, 5, "Converting Lyrics to SRT")
-    lrc_to_srt(lrc_file, temp_srt_file)
-
-    # Step 3: Split the SRT into main and after
-    update_progress(song_name, artist_name, album_name, 6, "Splitting Subtitles")
-    split_srt_to_two(temp_srt_file, temp_main_srt_file, temp_after_srt_file)
-    
-    # Step 4: Create Video
-    update_progress(song_name, artist_name, album_name, 7, "Creating Karaoke Video")
-    create_video(video_file, audio_file, temp_accompaniment_file, temp_main_srt_file, temp_after_srt_file, output_file)
-
-    # # Clean up temporary files
-    for temp_file in [temp_srt_file, temp_main_srt_file, temp_after_srt_file, temp_accompaniment_file]:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
-
-# Main entry point
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python karaoke_video_maker.py input/<artist_name>/<album_name>/<artist_name> - <song_name>")
-        sys.exit(1)
-
-    base_path = sys.argv[1]
-    create_karaoke(base_path)
-
-if __name__ == "__main__":
-    main()

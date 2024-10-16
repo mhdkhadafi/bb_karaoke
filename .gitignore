@@ -46,4 +46,4 @@ shared/output/*
 spotify_cache
 
 # test script
-web/test.py
+app/test.py

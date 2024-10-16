@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from extensions import db
+from app.app.extensions import db
 from flask_migrate import Migrate
 import os
 from fuzzywuzzy import process
