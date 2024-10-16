@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    build: web/.
+    build: app/.
     ports:
       - "5000:5000"
       - "8888:8888"
@@ -14,7 +14,7 @@ services:
       - celery_worker
       - redis
   celery_worker:
-    build: web/.  # Reuse the same image, but run Celery worker instead of the web app
+    build: app/.  # Reuse the same image, but run Celery worker instead of the web app
     command: /bin/bash -c "/app/replace_zotify_credentials.sh && celery -A celery_app worker --loglevel=info"
     volumes:
       - ./shared:/app/shared  # Shared volume for file access
