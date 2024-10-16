@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from extensions import db
 from flask_migrate import Migrate
@@ -9,6 +9,7 @@ from karaoke_video_maker import create_karaoke
 from app_db import update_progress, init_db
 import sqlite3
 from celery_app import celery_app
+from models import SongQueue
 
 app = Flask(__name__)
 
@@ -47,45 +48,55 @@ def index():
 # Add a song to the download queue from the Spotify results
 @app.route('/add_to_queue', methods=['POST'])
 def add_to_queue():
-    song = {
-        'name': request.form['song_name'],
-        'artist': request.form['artist_name'],
-        'album': request.form['album_name'],
-        'spotify_url': request.form['spotify_url']
-    }
-    download_queue.append(song)
-    
-    # Start processing the queue automatically if there's at least one song
-    if len(download_queue) == 1:
-        process_queue.delay()
+    song = SongQueue(
+        name=request.form['song_name'],
+        artist=request.form['artist_name'],
+        album=request.form['album_name'],
+        spotify_url=request.form['spotify_url'],
+        status='queued'
+    )
+    db.session.add(song)
+    db.session.commit()
+
+    # Start processing the queue if not already running
+    process_queue_if_not_running()
 
     return redirect(url_for('queue'))
 
 # Display the download queue
 @app.route('/queue')
 def queue():
-    return render_template('queue.html', download_queue=download_queue)
+    # Fetch all songs from the SongQueue table
+    # You can filter based on status if needed
+    songs_in_queue = SongQueue.query.order_by(SongQueue.timestamp).all()
+    return render_template('queue.html', songs_in_queue=songs_in_queue)
 
 # Remove a song from the download queue
-@app.route('/remove_from_queue/<int:index>', methods=['POST'])
-def remove_from_queue(index):
-    if 0 <= index < len(download_queue):
-        download_queue.pop(index)
+@app.route('/remove_from_queue/<int:song_id>', methods=['POST'])
+def remove_from_queue(song_id):
+    song = SongQueue.query.get(song_id)
+    if song:
+        db.session.delete(song)
+        db.session.commit()
     return redirect(url_for('queue'))
 
-@app.route('/progress/<song_name>/<artist_name>/<album_name>', methods=['GET'])
-def get_progress(song_name, artist_name, album_name):
-    conn = sqlite3.connect('karaoke_progress.db')
-    c = conn.cursor()
-    c.execute('''SELECT progress, status FROM progress WHERE song_name = ? AND artist_name = ? AND album_name = ?''',
-              (song_name, artist_name, album_name))
-    result = c.fetchone()
-    conn.close()
-
-    if result:
-        return {'progress': result[0], 'status': result[1]}
+@app.route('/progress/<int:song_id>')
+def progress(song_id):
+    song = SongQueue.query.get(song_id)
+    if song:
+        # Assuming you have a way to calculate progress based on song status
+        # You might store progress as a separate field in the SongQueue model
+        # For this example, we'll use a simple mapping
+        status_progress_map = {
+            'queued': 0,
+            'processing': 50,
+            'completed': 100,
+            'failed': 0
+        }
+        progress = status_progress_map.get(song.status, 0)
+        return jsonify({'progress': progress, 'status': song.status})
     else:
-        return {'progress': 0, 'status': 'Not Started'}
+        return jsonify({'progress': 0, 'status': 'unknown'})
 
 # Step 2: Fuzzy search function to find matching songs
 def search_songs(query, limit=5):
@@ -112,38 +123,60 @@ def search_songs(query, limit=5):
         return best_matches
     return []
 
+def process_queue_if_not_running():
+    # Check if any song is currently being processed
+    processing_song = SongQueue.query.filter_by(status='processing').first()
+    queued_song = SongQueue.query.filter_by(status='queued').first()
+    if not processing_song and queued_song:
+        process_queue.delay()
+
 # Task to pop the song from the queue after the tasks complete
 @celery_app.task
-def pop_download_queue(song_name):
-    # Pop the first song from the queue
-    if download_queue:
-        print(f"Removing {song_name} from the queue")
-        download_queue.pop(0)
+def update_song_status(song_id):
+    song = SongQueue.query.get(song_id)
+    if song:
+        song.status = 'completed'
+        db.session.commit()
 
-    # After popping, check if there are more songs
-    if download_queue:
-        process_queue.delay()
+    # Check for next song and process
+    process_queue.delay()
+
+@celery_app.task
+def mark_song_as_failed(request, exc, traceback, song_id):
+    song = SongQueue.query.get(song_id)
+    if song:
+        song.status = 'failed'
+        db.session.commit()
+
+    # Proceed to next song
+    process_queue_if_not_running()
 
 # Function to process the queue automatically
 @celery_app.task(name='process_queue')
 def process_queue():
-    if download_queue:
-        # Get the first song from the queue
-        song = download_queue[0]
-        artist_name = song['artist']
-        album_name = song['album']
-        song_name = song['name']
-        url = song['spotify_url']
+    song = SongQueue.query.filter_by(status='queued').order_by(SongQueue.timestamp).first()
+    if song:
+        # Update status to 'processing'
+        song.status = 'processing'
+        db.session.commit()
 
+        # Extract song details
+        artist_name = song.artist
+        album_name = song.album
+        song_name = song.name
+        url = song.spotify_url
+
+        # Create the task chain
         chain = (
             run_download_process.s(artist_name, album_name, song_name, url) |
             create_karaoke.si(artist_name, album_name, song_name) |
-            pop_download_queue.si(song_name)  # Task to pop from queue
+            update_song_status.si(song.id)
         )
 
-        # Link an error handling task to pop the queue if any task fails
-        chain.link_error(pop_download_queue.s(song_name))
+        # Link error handling
+        chain.link_error(mark_song_as_failed.s(song.id))
 
+        # Start the task chain
         chain.apply_async()
     else:
         # Queue is empty, do nothing
