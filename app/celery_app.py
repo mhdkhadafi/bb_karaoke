@@ -3,7 +3,7 @@ from app import create_app
 
 flask_app = create_app()
 
-celery_app = Celery('bb_karaoke', broker=flask_app.config['CELERY_BROKER_URL'])
+celery_app = Celery(flask_app.import_name, broker=flask_app.config['CELERY_BROKER_URL'], include=['app.tasks'])
 celery_app.conf.update(flask_app.config)
 
 class ContextTask(celery_app.Task):

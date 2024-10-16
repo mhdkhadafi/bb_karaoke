@@ -1,8 +1,8 @@
 # app/routes.py
 
+from track_downloader import search_spotify
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from .models import SongQueue
-from app.tasks import process_queue_if_not_running
 from extensions import db
 import os
 
@@ -35,7 +35,8 @@ def add_to_queue():
     db.session.add(song)
     db.session.commit()
 
-    # Start processing the queue if not already running
+    # Import within the function to avoid circular import
+    from .tasks import process_queue_if_not_running
     process_queue_if_not_running()
 
     return redirect(url_for('main.queue'))
