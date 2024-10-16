@@ -1,12 +1,13 @@
 import os
 import shutil
 import tempfile
-from app.celery_app import celery_app
-from app.aws_helpers import upload_to_s3
-from app.karaoke_video_maker import create_video, lrc_to_srt, remove_vocals, split_srt_to_two
-from app.track_downloader import download_audio, download_lyrics, download_video
+from celery_app import celery_app
 from .models import SongQueue
-from .extensions import db
+from extensions import db
+from app.utils import update_song_progress
+from app.track_downloader import download_audio, download_video, download_lyrics
+from app.karaoke_video_maker import create_video, lrc_to_srt, remove_vocals, split_srt_to_two
+from app.aws_helpers import upload_to_s3
 
 @celery_app.task(name='process_queue')
 def process_queue():
@@ -118,10 +119,3 @@ def mark_song_as_failed(request, exc, traceback, song_id):
         song.status = 'failed'
         db.session.commit()
     process_queue.delay()
-
-def update_song_progress(song_id, progress, status):
-    song = SongQueue.query.get(song_id)
-    if song:
-        song.progress = progress
-        song.status = status
-        db.session.commit()
