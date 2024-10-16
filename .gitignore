@@ -44,3 +44,6 @@ shared/output/*
 # env
 .env
 spotify_cache
+
+# test script
+web/test.py
