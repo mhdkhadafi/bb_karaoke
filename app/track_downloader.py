@@ -7,8 +7,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import pathlib
 import requests
-from app_db import update_progress
-from celery_app import celery_app
 
 # Authenticate with Spotify using Spotipy
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -136,25 +134,3 @@ def download_lyrics(artist_name, album_name, song_name):
         print(f"Error searching lyrics: {response.status_code} - {response.text}")
         return None
 
-# Main function to run the full process
-@celery_app.task
-def run_download_process(artist_name, album_name, song_name, url):
-    # artist_name, album_name, song_name, url = search_spotify(search_term)
-
-    # # Step 1: Download audio using Zotify
-    update_progress(song_name, artist_name, album_name, 1, "Downloading Audio")
-    download_audio(url)
-
-    # # Step 2: Download video using yt-dlp
-    update_progress(song_name, artist_name, album_name, 2, "Downloading Video")
-    download_video(artist_name, album_name, song_name)
-
-    # Step 3: Download lyrics using lrclib
-    update_progress(song_name, artist_name, album_name, 3, "Downloading Lyrics")
-    download_lyrics(artist_name, album_name, song_name)
-
-    return artist_name, album_name, song_name
-
-# Entry point for running the script
-if __name__ == "__main__":
-    run_download_process()

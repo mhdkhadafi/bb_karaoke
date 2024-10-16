@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 
 import moviepy.editor as mp
-from pydub import AudioSegment
 import pysrt
 import subprocess
 import os
 import re
-import sys
-from app_db import update_progress
-import requests
-from celery_app import celery_app
-import time
 import shutil
 
 def rename_file_without_special_chars(file_path):
