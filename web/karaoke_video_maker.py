@@ -132,18 +132,19 @@ def split_srt_to_two(srt_path, main_srt_path, after_srt_path):
     after_subs.save(after_srt_path)
 
 def create_video(video_file, audio_with_vocals, audio_without_vocals, main_srt, after_srt, output_file):
-    font = "Arial Unicode MS"
+    font = "Noto Sans"
+    fallback_fonts = "Noto Sans CJK SC, Noto Sans CJK TC, Noto Sans CJK HK, Noto Sans CJK KR, Noto Sans CJK JP"
 
     command = [
         'ffmpeg',
         '-i', video_file,                     # Input video (VP8 in WebM)
-        '-i', audio_with_vocals,              # First audio track (with vocals)
-        '-i', audio_without_vocals,           # Second audio track (without vocals)
+        '-i', audio_without_vocals,              # First audio track (with vocals)
+        '-i', audio_with_vocals,           # Second audio track (without vocals)
         '-map', '0:v',                        # Map video stream
         '-map', '1:a',                        # Map first audio stream (with vocals)
         '-map', '2:a',                        # Map second audio stream (without vocals)
-        '-vf', f"[0:v]subtitles={main_srt}:force_style='Fontname={font},Fontsize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=30'," \
-            f"subtitles={after_srt}:force_style='Fontname={font},Fontsize=18,PrimaryColour=&H00808080,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=10'[out]",
+        '-vf', f"[0:v]subtitles={after_srt}:force_style='Fontname={font},FallbackFonts={fallback_fonts},Fontsize=16,PrimaryColour=&H00808080,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=10'," \
+            f"subtitles={main_srt}:force_style='Fontname={font},FallbackFonts={fallback_fonts},Fontsize=24,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=3,Alignment=2,MarginV=30'[out]",
         '-c:v', 'libx264',                    # Re-encode video to H.264 for MP4 compatibility
         '-c:a', 'aac',                        # Encode audio to AAC
         '-strict', 'experimental',            # Enable experimental features for AAC
@@ -211,7 +212,7 @@ def create_karaoke(artist_name, album_name, song_name):
     temp_accompaniment_file = os.path.join(input_folder, f"{artist_name}_{album_name}_{song_name}_accompaniment.wav")
     original_accompaniment_file = os.path.join(input_folder, f"{artist_name} - {song_name}", 'accompaniment.wav')
 
-    # Step 1: Add .ogg audio to video
+    # Step 1: Remove vocals from audio
     update_progress(song_name, artist_name, album_name, 4, "Adding Audio")
     remove_vocals(audio_file, input_folder)
     shutil.move(original_accompaniment_file, temp_accompaniment_file)

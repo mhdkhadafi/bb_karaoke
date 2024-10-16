@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     pipx \
     git \
     docker.io \
+    unifont \
+    fonts-noto-core \
+    fonts-noto-cjk \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

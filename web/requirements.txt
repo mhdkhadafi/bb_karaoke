@@ -10,3 +10,4 @@ celery[redis]
 Flask_SQLAlchemy
 Flask_Migrate
 psycopg2-binary
+boto3

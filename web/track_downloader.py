@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import json
 import subprocess
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -63,6 +64,7 @@ def download_video(artist, album, song_name):
         "-o", str(video_file_path),
         "--extractor-args", f"youtube:player-client=web,default;po_token=web+{po_token}",
         "--cookies", "cookies.txt",
+        "--no-playlist",
         f"ytsearch:{artist} {song_name}"
     ]
     subprocess.run(command)
@@ -70,11 +72,34 @@ def download_video(artist, album, song_name):
     print(f"Video saved to: {video_file_path}")
     return video_file_path
 
+def get_audio_duration(ogg_file_path):
+    command = [
+        'ffprobe', 
+        '-v', 'error', 
+        '-show_entries', 'format=duration', 
+        '-of', 'json', 
+        ogg_file_path
+    ]
+    
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode == 0:
+        ffprobe_data = json.loads(result.stdout)
+        duration = float(ffprobe_data['format']['duration'])
+        return round(duration)
+    else:
+        print(f"Error getting duration for {ogg_file_path}: {result.stderr}")
+        return None
+
 # Step 3: Download lyrics using lrclib API
 def download_lyrics(artist_name, album_name, song_name):
     base_path = pathlib.Path("shared/input") / artist_name / album_name
     lrc_file_path = base_path / f"{artist_name} - {song_name}.lrc"
     search_term = f"{artist_name} {song_name}"
+    ogg_file_path = base_path / f"{artist_name} - {song_name}.ogg"
+    duration = get_audio_duration(ogg_file_path)
+    if duration is None:
+        print(f"Could not get duration for {ogg_file_path}")
+        return None
 
     # Skip download if the LRC file already exists
     if lrc_file_path.exists():
@@ -84,19 +109,21 @@ def download_lyrics(artist_name, album_name, song_name):
     print(f"Searching for lyrics for: {search_term}...")
 
     base_url = "https://lrclib.net/api"
-    search_url = f"{base_url}/search"
+    get_url = f"{base_url}/get"
     params = {
-        "q": search_term
+        "track_name": song_name,
+        "artist_name": artist_name,
+        "duration": duration
     }
     # Search for lyrics using lrclib API
-    response = requests.get(search_url, params=params)
+    response = requests.get(get_url, params=params)
     
     if response.status_code == 200:
         data = response.json()
         
         if data:
             # Get the first result's synced lyrics
-            lyrics = data[0]['syncedLyrics']
+            lyrics = data['syncedLyrics']
             
             with open(lrc_file_path, 'w') as f:
                 f.write(lyrics)
