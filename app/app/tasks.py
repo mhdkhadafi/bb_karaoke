@@ -42,7 +42,7 @@ def process_queue():
 @shared_task
 def run_download_process(song_id, artist_name, album_name, song_name, url):
     update_song_progress(song_id, progress=10, status='Downloading Audio')
-    download_audio(url)
+    download_audio(artist_name, album_name, song_name, url)
 
     update_song_progress(song_id, progress=30, status='Downloading Video')
     download_video(artist_name, album_name, song_name)

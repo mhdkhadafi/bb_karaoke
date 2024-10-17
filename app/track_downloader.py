@@ -36,13 +36,13 @@ def search_spotify(search_term):
     return tracks
 
 # Step 1: Search and download audio file using Zotify
-def download_audio(spotify_url):
+def download_audio(artist_name, album_name, song_name, spotify_url):
     # Run zotify search command as a subprocess
     result = subprocess.run(
         ['zotify', spotify_url, 
          '--download-lyrics', 'False',
          '--root-path', str(pathlib.Path().resolve()),
-         '--output', 'shared/input/{artist}/{album}/{artist} - {song_name}.{ext}']
+         '--output', f'shared/input/{artist_name}/{album_name}/{artist_name} - {song_name}.ogg']
         )
     
 def download_video(artist, album, song_name):
