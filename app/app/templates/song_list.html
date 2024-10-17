@@ -50,12 +50,14 @@
                             <h3>{{ artist_name }}</h3>
                             <ul class="song-list">
                                 {% for song in artist_songs %}
-                                    <form method="POST" action="{{ url_for('main.add_to_playlist') }}">
-                                        <input type="hidden" name="song_id" value="{{ song.id }}">
-                                        <div class="result-item" onclick="this.closest('form').submit();">
-                                            <strong>{{ song.song_name }}</strong> by {{ song.artist }} - {{ song.album }}
-                                        </div>
-                                    </form>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('main.add_to_playlist') }}">
+                                            <input type="hidden" name="song_id" value="{{ song.id }}">
+                                            <div class="result-item" onclick="this.closest('form').submit();">
+                                                <strong>{{ song.song_name }}</strong> by {{ song.artist }} - {{ song.album }}
+                                            </div>
+                                        </form>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -69,12 +71,14 @@
             {% if songs %}
                 <ul class="song-list">
                     {% for song in songs %}
-                        <form method="POST" action="{{ url_for('main.add_to_playlist') }}">
-                            <input type="hidden" name="song_id" value="{{ song.id }}">
-                            <div class="result-item" onclick="this.closest('form').submit();">
-                                <strong>{{ song.song_name }}</strong> by {{ song.artist }} - {{ song.album }}
-                            </div>
-                        </form>
+                        <li>
+                            <form method="POST" action="{{ url_for('main.add_to_playlist') }}">
+                                <input type="hidden" name="song_id" value="{{ song.id }}">
+                                <div class="result-item" onclick="this.closest('form').submit();">
+                                    <strong>{{ song.song_name }}</strong> by {{ song.artist }} - {{ song.album }}
+                                </div>
+                            </form>
+                        </li>
                     {% endfor %}
                 </ul>
             {% else %}
