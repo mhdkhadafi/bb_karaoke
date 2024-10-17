@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>BB Karaoke - Full Song List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Add this for mobile devices -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -91,8 +92,23 @@
             var content = document.querySelector('.accordion-content');
             content.style.display = (content.style.display === 'block') ? 'none' : 'block';
         }
+
+        // Close the accordion when clicking outside
+        document.addEventListener('click', function(event) {
+            var isClickInside = document.querySelector('.accordion-nav').contains(event.target);
+            if (!isClickInside) {
+                document.querySelector('.accordion-content').style.display = 'none';
+            }
+        });
+
+        // Close the accordion when clicking outside
+        document.addEventListener('click', function(event) {
+            var isClickInside = document.querySelector('.accordion-nav').contains(event.target);
+            if (!isClickInside) {
+                document.querySelector('.accordion-content').style.display = 'none';
+            }
+        });
     </script>
 
 </body>
 </html>
-

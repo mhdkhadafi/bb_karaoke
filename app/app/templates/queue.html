@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>BB Karaoke - Download Queue</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Add this for mobile devices -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -18,17 +19,18 @@
         <div class="accordion-content">
             <a href="/" class="nav-link">Home</a>
             <a href="/queue" class="nav-link">Queue</a>
-	    <a href="/song_list" class="nav-link">Song List</a>
+            <a href="/song_list" class="nav-link">Song List</a>
         </div>
     </div>
 
-    <!-- Queue -->
+    <!-- Queue Container -->
     <div class="queue-container">
         <h2>Download Queue:</h2>
         {% if songs_in_queue %}
             <div class="results-list">
                 {% for song in songs_in_queue %}
                     <div class="result-item">
+                        <button type="submit" class="remove-button" onclick="removeFromQueue({{ song.id }})">×</button>
                         <strong>{{ song.name }}</strong><br>
                         <span class="artist">by: {{ song.artist }}</span><br>
                         <span class="album">album: {{ song.album }}</span><br>
@@ -36,9 +38,6 @@
                         <div class="progress-bar">
                             <div class="progress" id="progress-{{ loop.index0 }}"></div>
                         </div>
-                        <form method="POST" action="{{ url_for('main.remove_from_queue', song_id=song.id) }}">
-                            <button type="submit" class="remove-button">×</button>
-                        </form>
                     </div>
                 {% endfor %}
             </div>
@@ -51,15 +50,27 @@
         const queueContainer = document.querySelector('.queue-container');
         const logo = document.querySelector('.logo');
 
-        if (queueContainer && queueContainer.style.display !== 'none') {
-            logo.classList.add('logo-top');
-        }
-
         // Toggle function for accordion menu
         function toggleAccordion() {
             var content = document.querySelector('.accordion-content');
             content.style.display = (content.style.display === 'block') ? 'none' : 'block';
         }
+
+        // Close the accordion when clicking outside
+        document.addEventListener('click', function(event) {
+            var isClickInside = document.querySelector('.accordion-nav').contains(event.target);
+            if (!isClickInside) {
+                document.querySelector('.accordion-content').style.display = 'none';
+            }
+        });
+
+        // Close the accordion when clicking outside
+        document.addEventListener('click', function(event) {
+            var isClickInside = document.querySelector('.accordion-nav').contains(event.target);
+            if (!isClickInside) {
+                document.querySelector('.accordion-content').style.display = 'none';
+            }
+        });
 
         // Function to fetch progress data periodically
         function fetchProgress() {
@@ -82,8 +93,16 @@
         setInterval(fetchProgress, 5000);
         // Initial fetch
         fetchProgress();
+
+        // Remove song from queue
+        function removeFromQueue(songId) {
+            fetch('/remove_from_queue/' + songId, {
+                method: 'POST'
+            }).then(() => {
+                location.reload();
+            });
+        }
     </script>
 
 </body>
 </html>
-

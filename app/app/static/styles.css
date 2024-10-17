@@ -8,41 +8,43 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
     margin: 0;
+    padding-top: 70px; /* Add padding to push content below the fixed logo */
 }
 
 /* Logo Styling */
 .logo {
     text-align: center;
-    margin-bottom: 30px;
+    position: fixed; /* Fix the logo at the top */
+    top: 0;
+    width: 100%;
+    background-color: #f5f5f5; /* Match the background color */
+    z-index: 100;
+    padding: 10px 0;
 }
 
 .logo-text {
     font-family: 'Newake', sans-serif;
-    font-size: 48px;
+    font-size: 36px; /* Adjust font size for mobile friendliness */
     font-weight: bold;
     color: #000;
     text-decoration: none;
+    margin: 0;
 }
 
 /* Accordion button styling */
 .accordion-btn {
     background-color: #333;
     color: white;
-    padding: 10px 20px;
+    padding: 10px;
     border: none;
     cursor: pointer;
-    font-size: 24px; /* Increased font size for the "☰" */
+    font-size: 24px;
     border-radius: 5px;
-    position: fixed; /* Fixed positioning */
-    top: 10px; /* Top-left corner */
-    left: 10px;
-    z-index: 100; /* Ensure it stays above other content */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 101;
     transition: background-color 0.3s ease;
 }
 
@@ -50,7 +52,7 @@ body {
     background-color: #555;
 }
 
-/* Accordion content (initially hidden) */
+/* Accordion content */
 .accordion-content {
     display: none;
     background-color: #f9f9f9;
@@ -58,9 +60,17 @@ body {
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: fixed;
-    top: 65px; /* Positioned just below the button */
+    top: 60px;
+    left: 15px;
+    z-index: 100;
+    width: 200px;
+}
+
+.accordion-nav {
+    position: fixed;
+    top: 10px;
     left: 10px;
-    z-index: 99;
+    z-index: 101; /* Ensure it stays above other content */
 }
 
 /* Navigation links inside accordion */
@@ -184,43 +194,49 @@ body {
 }
 
 .results-list {
-    display: flex;
-    flex-direction: column;
+    margin-top: 20px;
 }
 
 .result-item {
-    position: relative; /* For the 'x' button positioning */
+    position: relative;
     background-color: #fff;
     padding: 15px;
     margin-bottom: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: background-color 0.3s;
+}
+
+.result-item strong {
+    font-size: 16px;
+}
+
+.result-item .artist,
+.result-item .album,
+.result-item .status {
+    font-size: 14px;
+    color: #666;
 }
 
 .result-item:hover {
     background-color: #f0f0f0;
 }
 
-.artist, .album, .status {
-    font-size: smaller;
-    color: #666;
-}
-
-/* Styling the queue page */
+/* Queue Container */
 .queue-container {
-    width: 80%;
+    width: 100%;
     max-width: 1200px;
-    margin: 0 auto; /* Center the container */
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: absolute;
-    top: 60px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    /* Removed position and top properties to allow natural flow */
 }
 
-/* Result item remove button ('x') */
+.queue-container h2 {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* Remove Button */
 .remove-button {
     position: absolute;
     top: 10px;
@@ -237,7 +253,6 @@ body {
     color: #e55347;
 }
 
-/* Progress bar container */
 .progress-bar {
     width: 100%;
     background-color: #f3f3f3;
@@ -247,7 +262,6 @@ body {
     position: relative;
 }
 
-/* Progress bar fill */
 .progress {
     background-color: #4caf50;
     height: 100%;
@@ -256,22 +270,24 @@ body {
     transition: width 0.4s ease;
     color: white;
     text-align: center;
-    line-height: 20px; /* Vertically center the text */
+    line-height: 20px;
     font-size: 12px;
 }
 
 /* Toggle Buttons */
 .toggle-buttons {
-    text-align: center;
-    margin-top: 80px;
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 .toggle-button {
-    display: inline-block;
+    flex: 1;
+    text-align: center;
     background-color: #007BFF;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 0;
     margin: 0 5px;
     border-radius: 50px;
     text-decoration: none;
@@ -289,17 +305,19 @@ body {
 
 /* Letters Navigation */
 .letters-navigation {
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     margin-bottom: 20px;
 }
 
 .letter {
     display: inline-block;
     color: #007BFF;
-    padding: 5px 10px;
-    margin: 0 2px;
+    padding: 5px 8px;
+    margin: 2px;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 14px;
     transition: color 0.3s ease;
 }
 
@@ -314,13 +332,12 @@ body {
 
 /* Song List Container */
 .song-list-container {
-    width: 80%;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px;
-    margin-top: 20px;
-    position: relative;
-    top: 60px;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    /* Removed position and top properties to allow natural flow */
 }
 
 /* Artist List */
@@ -332,10 +349,13 @@ body {
     margin-bottom: 20px;
 }
 
+/* Artist Section */
 .artist-section h3 {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+    font-size: 18px;
 }
 
+/* Song List */
 .song-list {
     list-style-type: none;
     padding: 0;
@@ -347,6 +367,7 @@ body {
     margin-bottom: 5px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
 }
 
 /* Pagination */
@@ -358,7 +379,7 @@ body {
 .pagination-button {
     background-color: #007BFF;
     color: white;
-    padding: 8px 16px;
+    padding: 8px 12px;
     margin: 0 5px;
     border-radius: 50px;
     text-decoration: none;
@@ -377,6 +398,14 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    body {
+        padding-top: 60px; /* Adjust padding for smaller screens */
+    }
+
+    .logo-text {
+        font-size: 28px;
+    }
+
     .search-bar {
         width: 90%;
     }
@@ -385,8 +414,21 @@ body {
         width: 90%;
     }
 
+    .letter {
+        font-size: 12px;
+        padding: 4px 6px;
+    }
+
     .song-list-container {
-        width: 90%;
+        padding: 10px;
+    }
+
+    .song-list li {
+        font-size: 13px;
+    }
+
+    .artist-section h3 {
+        font-size: 16px;
     }
 
     .toggle-buttons {
@@ -394,6 +436,58 @@ body {
     }
 
     .toggle-button {
-        margin-bottom: 10px;
+        font-size: 14px;
+        padding: 8px 0;
+    }
+
+    .result-item {
+        padding: 10px;
+    }
+
+    .result-item strong {
+        font-size: 14px;
+    }
+
+    .result-item .artist,
+    .result-item .album,
+    .result-item .status {
+        font-size: 12px;
+    }
+
+    .progress-bar {
+        height: 16px;
+    }
+
+    .progress {
+        line-height: 16px;
+        font-size: 10px;
+    }
+
+    .remove-button {
+        font-size: 18px;
+    }
+
+    .accordion-content {
+        width: 80%;
+        left: 10%;
+        top: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .toggle-buttons {
+        flex-direction: column;
+    }
+
+    .toggle-button {
+        margin: 5px 0;
+    }
+
+    .letters-navigation {
+        justify-content: center;
+    }
+
+    .letter {
+        margin: 1px;
     }
 }

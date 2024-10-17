@@ -112,6 +112,14 @@
             content.style.display = (content.style.display === 'block') ? 'none' : 'block';
         }
 
+        // Close the accordion when clicking outside
+        document.addEventListener('click', function(event) {
+            var isClickInside = document.querySelector('.accordion-nav').contains(event.target);
+            if (!isClickInside) {
+                document.querySelector('.accordion-content').style.display = 'none';
+            }
+        });
+
         // Clicking logo redirects to main page
         document.querySelector('.logo-text').addEventListener('click', function () {
             window.location.href = '/';
