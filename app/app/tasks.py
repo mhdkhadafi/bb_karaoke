@@ -3,7 +3,7 @@ import shutil
 import tempfile
 from celery_app import celery_app
 from celery import shared_task, chain
-from .models import SongQueue
+from .models import AvailableSong, SongQueue
 from extensions import db
 from app.utils import update_song_progress
 from track_downloader import download_audio, download_video, download_lyrics
@@ -97,7 +97,17 @@ def create_karaoke(song_id, artist_name, album_name, song_name):
             # Upload to S3
             update_song_progress(song_id, progress=90, status="Uploading to S3")
             s3_file_name = f"{artist_name}/{album_name}/{artist_name} - {song_name}.mp4"
-            upload_to_s3(output_file, bucket_name='your-bucket-name', s3_file_name=s3_file_name)
+            upload_to_s3(output_file, bucket_name='bb-karaoke', s3_file_name=s3_file_name)
+
+            # After successful upload, store song metadata
+            song = AvailableSong(
+                artist=artist_name,
+                album=album_name,
+                song_name=song_name,
+                s3_key=s3_file_name
+            )
+            db.session.add(song)
+            db.session.commit()
 
             # Clean up input files
             update_song_progress(song_id, progress=95, status="Cleaning Up")
