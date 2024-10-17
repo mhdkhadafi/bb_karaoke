@@ -2,7 +2,7 @@
 
 from track_downloader import search_spotify
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from .models import SongQueue, AvailableSong
+from .models import PlaylistSong, SongQueue, AvailableSong
 from .utils import search_songs
 from .tasks import process_queue
 from sqlalchemy import func
@@ -143,3 +143,55 @@ def song_list():
                                page=page,
                                total_pages=total_pages,
                                songs=songs)
+
+# Display the playlist
+@main_bp.route('/playlist')
+def playlist():
+    # Fetch songs in the playlist ordered by their position
+    playlist_songs = PlaylistSong.query.order_by(PlaylistSong.position).all()
+    return render_template('playlist.html', playlist_songs=playlist_songs)
+
+# Add a song to the playlist
+@main_bp.route('/add_to_playlist', methods=['POST'])
+def add_to_playlist():
+    song_id = request.form.get('song_id')
+    if song_id:
+        # Fetch the song from AvailableSong
+        song = AvailableSong.query.get(song_id)
+        if song:
+            # Determine the next position
+            max_position = db.session.query(db.func.max(PlaylistSong.position)).scalar()
+            next_position = (max_position or 0) + 1
+
+            # Create a new PlaylistSong entry
+            playlist_song = PlaylistSong(
+                song_id=song.id,
+                song_name=song.song_name,
+                artist_name=song.artist,
+                album_name=song.album,
+                position=next_position
+            )
+            db.session.add(playlist_song)
+            db.session.commit()
+    return redirect(url_for('main.playlist'))
+
+# Remove a song from the playlist
+@main_bp.route('/remove_from_playlist/<int:playlist_song_id>', methods=['POST'])
+def remove_from_playlist(playlist_song_id):
+    playlist_song = PlaylistSong.query.get(playlist_song_id)
+    if playlist_song:
+        db.session.delete(playlist_song)
+        db.session.commit()
+    return redirect(url_for('main.playlist'))
+
+# Update the playlist order
+@main_bp.route('/update_playlist_order', methods=['POST'])
+def update_playlist_order():
+    order = request.json.get('order')
+    if order:
+        for idx, playlist_song_id in enumerate(order):
+            playlist_song = PlaylistSong.query.get(playlist_song_id)
+            if playlist_song:
+                playlist_song.position = idx
+        db.session.commit()
+    return jsonify({'status': 'success'})
