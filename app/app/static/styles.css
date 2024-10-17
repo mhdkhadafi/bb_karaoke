@@ -162,7 +162,9 @@ body.center-content .logo {
 
 /* Headings for Results */
 .results-container h2,
-.spotify-results-container h2 {
+.spotify-results-container h2 
+.song-list-container h2
+.queue-container h2 {
     width: 80%;
     max-width: 1200px;
     margin: 20px auto 10px auto;
@@ -171,8 +173,18 @@ body.center-content .logo {
 
 /* Content starts below the fixed header */
 body.fixed-header .content,
-body.fixed-header .container {
-    margin-top: 130px; /* Adjust based on the height of the logo and search bar */
+body.fixed-header .container,
+body.fixed-header .song-list-container,
+body.fixed-header .queue-container
+ {
+    margin-top: 140px; /* Adjust based on the height of the logo and search bar */
+}
+
+/* Content starts below the fixed header */
+body.fixed-header .song-list-container,
+body.fixed-header .queue-container
+ {
+    margin-top: 100px; /* Adjust based on the height of the logo and search bar */
 }
 
 /* Center content vertically and horizontally */
