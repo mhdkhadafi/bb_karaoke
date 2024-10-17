@@ -179,14 +179,12 @@ body.fixed-header .song-list-container {
 
 /* Content starts below the fixed header */
 body.fixed-header .content,
-body.fixed-header .container,
-body.fixed-header .queue-container
+body.fixed-header .container
  {
     margin-top: 140px; /* Adjust based on the height of the logo and search bar */
 }
 
 /* Content starts below the fixed header */
-body.fixed-header .song-list-container,
 body.fixed-header .queue-container
  {
     margin-top: 100px; /* Adjust based on the height of the logo and search bar */
