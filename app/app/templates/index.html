@@ -70,7 +70,7 @@
                 <h2>Spotify Search Results:</h2>
                 <div class="results-list">
                     {% for result in spotify_results %}
-                        <form method="POST" action="{{ url_for('add_to_queue') }}">
+                        <form method="POST" action="{{ url_for('main.add_to_queue') }}">
                             <input type="hidden" name="song_name" value="{{ result.name }}">
                             <input type="hidden" name="artist_name" value="{{ result.artists[0].name }}">
                             <input type="hidden" name="album_name" value="{{ result.album.name }}">
