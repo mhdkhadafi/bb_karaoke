@@ -1,0 +1,102 @@
+<!-- templates/playlist.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BB Karaoke - Playlist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="fixed-header">
+
+    <!-- Logo -->
+    <div class="logo fixed-top">
+        <a href="/" class="logo-text">BB Karaoke</a>
+    </div>
+
+    <!-- Accordion Navigation -->
+    <div class="accordion-nav">
+        <button class="accordion-btn" onclick="toggleAccordion()">☰</button>
+        <div class="accordion-content">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/queue" class="nav-link">Queue</a>
+            <a href="/song_list" class="nav-link">Song List</a>
+            <a href="/playlist" class="nav-link">Playlist</a>
+        </div>
+    </div>
+
+    <!-- Playlist Container -->
+    <div class="container">
+        <h2>Your Playlist</h2>
+        {% if playlist_songs %}
+            <ul id="playlist" class="playlist-list">
+                {% for song in playlist_songs %}
+                    <li class="playlist-item" data-id="{{ song.id }}">
+                        <button class="remove-button" onclick="removeFromPlaylist({{ song.id }})">×</button>
+                        <strong>{{ song.song_name }}</strong><br>
+                        <span class="artist">by: {{ song.artist_name }}</span><br>
+                        <span class="album">album: {{ song.album_name }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+            <button class="play-button" onclick="startPlayback()">Play</button>
+        {% else %}
+            <p>Your playlist is empty.</p>
+        {% endif %}
+    </div>
+
+    <!-- Include SortableJS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+    <script>
+        // Toggle function for accordion menu
+        function toggleAccordion() {
+            var content = document.querySelector('.accordion-content');
+            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Close the accordion when clicking outside
+        document.addEventListener('click', function(event) {
+            var isClickInside = document.querySelector('.accordion-nav').contains(event.target);
+            if (!isClickInside) {
+                document.querySelector('.accordion-content').style.display = 'none';
+            }
+        });
+
+        // Remove song from playlist
+        function removeFromPlaylist(playlistSongId) {
+            fetch('/remove_from_playlist/' + playlistSongId, {
+                method: 'POST'
+            }).then(() => {
+                location.reload();
+            });
+        }
+
+        // Initialize Sortable for drag-and-drop
+        var sortable = new Sortable(document.getElementById('playlist'), {
+            animation: 150,
+            onEnd: function (evt) {
+                var order = [];
+                var items = document.querySelectorAll('.playlist-item');
+                items.forEach(function(item) {
+                    order.push(item.getAttribute('data-id'));
+                });
+                // Send the new order to the server
+                fetch('/update_playlist_order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({order: order})
+                });
+            }
+        });
+
+        function startPlayback() {
+            // Placeholder for playback functionality
+            alert('Playback will start (to be implemented).');
+        }
+    </script>
+
+</body>
+</html>
