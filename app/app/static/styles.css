@@ -196,8 +196,12 @@ body.fixed-header .container
     margin-top: 140px; /* Adjust based on the height of the logo and search bar */
 }
 
-body.fixed-header .playlistcontainer
+body.fixed-header .playlist-container
  {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 0;
     margin-top: 50px; /* Adjust based on the height of the logo and search bar */
 }
 
