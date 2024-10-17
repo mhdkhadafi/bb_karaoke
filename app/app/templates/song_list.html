@@ -25,6 +25,7 @@
 
     <!-- Song List Container -->
     <div class="song-list-container">
+        <h2>Song List:</h2>
         <!-- Toggle between 'By Song' and 'By Artist' -->
         <div class="toggle-buttons">
             <a href="{{ url_for('main.song_list', view='song', letter=letter) }}" class="toggle-button {{ 'active' if view_type == 'song' else '' }}">By Song</a>

@@ -162,8 +162,8 @@ body.center-content .logo {
 
 /* Headings for Results */
 .results-container h2,
-.spotify-results-container h2 
-.song-list-container h2
+.spotify-results-container h2, 
+.song-list-container h2,
 .queue-container h2 {
     width: 80%;
     max-width: 1200px;
@@ -204,6 +204,7 @@ body.center-content {
 }
 
 .result-item {
+    position: relative;
     background-color: #fff;
     padding: 15px;
     margin-bottom: 10px;
