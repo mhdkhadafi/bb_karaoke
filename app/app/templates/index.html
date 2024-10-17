@@ -20,6 +20,7 @@
             <a href="/" class="nav-link">Home</a>
             <a href="/queue" class="nav-link">Queue</a>
             <a href="/song_list" class="nav-link">Song List</a>
+            <a href="/playlist" class="nav-link">Playlist</a>
         </div>
     </div>
 
@@ -46,11 +47,14 @@
                 <h2>Search Results:</h2>
                 <div class="results-list">
                     {% for result in search_results %}
-                        <div class="result-item" onclick="location.href='/start_download/{{ result['spotify_url'] }}'">
-                            <strong>{{ result.song_name }}</strong><br>
-                            <span class="artist">by: {{ result.artist_name }}</span><br>
-                            <span class="album">album: {{ result.album_name }}</span>
-                        </div>
+                        <form method="POST" action="{{ url_for('main.add_to_playlist') }}">
+                            <input type="hidden" name="song_id" value="{{ result['id'] }}">
+                            <div class="result-item" onclick="this.closest('form').submit();">
+                                <strong>{{ result.song_name }}</strong><br>
+                                <span class="artist">by: {{ result.artist_name }}</span><br>
+                                <span class="album">album: {{ result.album_name }}</span>
+                            </div>
+                        </form>
                     {% endfor %}
                 </div>
             {% else %}

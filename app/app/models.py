@@ -23,3 +23,16 @@ class AvailableSong(db.Model):
     song_name = db.Column(db.String(255), nullable=False)
     s3_key = db.Column(db.String(255), nullable=False)  # S3 object key
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class PlaylistSong(db.Model):
+    __tablename__ = 'playlist_songs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    song_id = db.Column(db.Integer, db.ForeignKey('available_songs.id'), nullable=False)
+    song_name = db.Column(db.String(255), nullable=False)
+    artist_name = db.Column(db.String(255), nullable=False)
+    album_name = db.Column(db.String(255), nullable=False)
+    position = db.Column(db.Integer, nullable=False)
+
+    song = db.relationship('AvailableSong', backref='playlist_entries')
