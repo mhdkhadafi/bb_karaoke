@@ -196,6 +196,11 @@ body.fixed-header .container
     margin-top: 140px; /* Adjust based on the height of the logo and search bar */
 }
 
+body.fixed-header .playlistcontainer
+ {
+    margin-top: 50px; /* Adjust based on the height of the logo and search bar */
+}
+
 /* Content starts below the fixed header */
 body.fixed-header .queue-container
  {
