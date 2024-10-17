@@ -1,7 +1,7 @@
 /* Newake Font Setup */
 @font-face {
     font-family: 'Newake';
-    src: url('{{ url_for('static', filename='fonts/Newake.otf') }}') format('opentype');
+    src: url('/static/fonts/Newake.otf') format('opentype');
 }
 
 /* Basic Styling */
@@ -11,19 +11,9 @@ body {
     margin: 0;
 }
 
-/* Center content when no search results are displayed */
-body:not(.results-displayed) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-}
-
 /* Logo Styling */
 .logo {
     text-align: center;
-    margin-bottom: 30px;
     transition: all 0.3s ease;
 }
 
@@ -35,8 +25,8 @@ body:not(.results-displayed) {
     text-decoration: none;
 }
 
-/* Logo adjustments when results are displayed */
-.logo-top {
+/* Default logo positioning for pages other than index */
+.logo.fixed-top {
     position: fixed;
     top: 10px;
     width: 100%;
@@ -46,8 +36,21 @@ body:not(.results-displayed) {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.logo-top .logo-text {
-    font-size: 36px; /* Adjust font size if needed */
+.logo.fixed-top .logo-text {
+    font-size: 36px;
+}
+
+/* Centered logo for index page when no results */
+body.center-content .logo {
+    margin-bottom: 30px;
+}
+
+/* Accordion Navigation */
+.accordion-nav {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 101;
 }
 
 /* Accordion button styling */
@@ -59,10 +62,6 @@ body:not(.results-displayed) {
     cursor: pointer;
     font-size: 24px;
     border-radius: 5px;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 101;
     transition: background-color 0.3s ease;
 }
 
@@ -84,11 +83,12 @@ body:not(.results-displayed) {
     width: 200px;
 }
 
-.accordion-nav {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 101; /* Ensure it stays above other content */
+@media (max-width: 768px) {
+    .accordion-content {
+        width: 80%;
+        left: 10%;
+        top: 60px;
+    }
 }
 
 /* Navigation links inside accordion */
@@ -108,17 +108,9 @@ body:not(.results-displayed) {
 /* Search Section */
 .search-section {
     width: 80%;
-    max-width: 800px; /* Set a maximum width */
+    max-width: 800px;
     margin: 0 auto;
     transition: all 0.3s ease;
-}
-
-/* Search Container */
-.search-container {
-    display: flex;
-    justify-content: center;
-    transition: all 0.3s ease;
-    margin-bottom: 20px;
 }
 
 /* Search Bar */
@@ -156,8 +148,8 @@ body:not(.results-displayed) {
     height: 24px;
 }
 
-/* Move Search Section to the Top After Search */
-.search-bar-top {
+/* Fixed search bar when results are displayed */
+.search-section.fixed-top {
     position: fixed;
     top: 70px;
     width: calc(100% - 40px);
@@ -165,57 +157,19 @@ body:not(.results-displayed) {
     z-index: 99;
 }
 
-/* Content starts below the search bar when results are displayed */
-body.results-displayed .content {
+/* Content starts below the fixed header */
+body.fixed-header .content,
+body.fixed-header .container {
     margin-top: 130px; /* Adjust based on the height of the logo and search bar */
 }
 
-/* Logo adjustments */
-.logo-top {
-    position: absolute;
-    top: 10px;
-    transition: all 0.3s ease;
-}
-
-/* Search Results */
-.results-container {
-    width: 80%;
-    max-width: 1200px;
-    margin: 0 auto; /* Center the container */
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Internet Search Button */
-.internet-search-container {
-    text-align: center;
-    margin: 20px 0;
-}
-
-.search-internet-button {
-    background-color: #007BFF;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.search-internet-button:hover {
-    background-color: #0056b3;
-}
-
-/* Styling the Spotify search results, similar to local results */
-.spotify-results-container {
-    width: 80%;
-    max-width: 1200px;
-    margin: 0 auto; /* Center the container */
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Center content vertically and horizontally */
+body.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
 }
 
 /* Results List */
@@ -239,69 +193,39 @@ body.results-displayed .content {
     background-color: #f0f0f0;
 }
 
-.result-item strong {
-    font-size: 16px;
-}
-
-.result-item .artist,
-.result-item .album,
-.result-item .status {
-    font-size: 14px;
+.artist,
+.album {
+    font-size: smaller;
     color: #666;
 }
 
+/* Internet Search Button */
+.internet-search-container {
+    text-align: center;
+    margin: 20px 0;
+}
 
-/* Queue Container */
-.queue-container {
-    width: 100%;
+.search-internet-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-internet-button:hover {
+    background-color: #0056b3;
+}
+
+/* Song List and Queue Containers */
+.container {
+    width: 80%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px 20px;
-    box-sizing: border-box;
-    /* Removed position and top properties to allow natural flow */
-}
-
-.queue-container h2 {
-    margin-top: 20px;
-    text-align: center;
-}
-
-/* Remove Button */
-.remove-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: transparent;
-    color: #FF6347;
-    font-size: 20px;
-    border: none;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.remove-button:hover {
-    color: #e55347;
-}
-
-.progress-bar {
-    width: 100%;
-    background-color: #f3f3f3;
-    border-radius: 5px;
-    margin-top: 10px;
-    height: 20px;
-    position: relative;
-}
-
-.progress {
-    background-color: #4caf50;
-    height: 100%;
-    width: 0;
-    border-radius: 5px;
-    transition: width 0.4s ease;
-    color: white;
-    text-align: center;
-    line-height: 20px;
-    font-size: 12px;
+    padding: 10px 0;
 }
 
 /* Toggle Buttons */
@@ -360,31 +284,6 @@ body.results-displayed .content {
     color: #0056b3;
 }
 
-/* Song List Container */
-.song-list-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 10px 20px;
-    box-sizing: border-box;
-    /* Removed position and top properties to allow natural flow */
-}
-
-/* Artist List */
-.artist-list {
-    margin-top: 20px;
-}
-
-.artist-section {
-    margin-bottom: 20px;
-}
-
-/* Artist Section */
-.artist-section h3 {
-    margin-bottom: 5px;
-    font-size: 18px;
-}
-
 /* Song List */
 .song-list {
     list-style-type: none;
@@ -398,6 +297,12 @@ body.results-displayed .content {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 14px;
+}
+
+/* Artist Section */
+.artist-section h3 {
+    margin-bottom: 5px;
+    font-size: 18px;
 }
 
 /* Pagination */
@@ -426,16 +331,53 @@ body.results-displayed .content {
     margin: 0 10px;
 }
 
+/* Remove Button */
+.remove-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    color: #FF6347;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.remove-button:hover {
+    color: #e55347;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    margin-top: 10px;
+    height: 20px;
+    position: relative;
+}
+
+.progress {
+    background-color: #4caf50;
+    height: 100%;
+    width: 0;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    body {
-        padding-top: 60px; /* Adjust padding for smaller screens */
-    }
-
+    /* Adjust logo text size */
     .logo-text {
         font-size: 36px;
     }
 
+    /* Adjust search bar elements */
     .search-bar {
         padding: 8px 12px;
     }
@@ -450,36 +392,7 @@ body.results-displayed .content {
         height: 20px;
     }
 
-    .results-container {
-        width: 90%;
-    }
-
-    .letter {
-        font-size: 12px;
-        padding: 4px 6px;
-    }
-
-    .song-list-container {
-        padding: 10px;
-    }
-
-    .song-list li {
-        font-size: 13px;
-    }
-
-    .artist-section h3 {
-        font-size: 16px;
-    }
-
-    .toggle-buttons {
-        flex-direction: column;
-    }
-
-    .toggle-button {
-        font-size: 14px;
-        padding: 8px 0;
-    }
-
+    /* Adjust result items */
     .result-item {
         padding: 10px;
     }
@@ -488,12 +401,34 @@ body.results-displayed .content {
         font-size: 16px;
     }
 
-    .result-item .artist,
-    .result-item .album,
-    .result-item .status {
+    .artist,
+    .album {
         font-size: 14px;
     }
 
+    /* Adjust accordion content */
+    .accordion-content {
+        width: 80%;
+        left: 10%;
+        top: 60px;
+    }
+
+    /* Adjust song list items */
+    .song-list li {
+        font-size: 13px;
+    }
+
+    /* Adjust artist section headings */
+    .artist-section h3 {
+        font-size: 16px;
+    }
+
+    /* Adjust remove button */
+    .remove-button {
+        font-size: 18px;
+    }
+
+    /* Adjust progress bar */
     .progress-bar {
         height: 16px;
     }
@@ -502,23 +437,15 @@ body.results-displayed .content {
         line-height: 16px;
         font-size: 10px;
     }
-
-    .remove-button {
-        font-size: 18px;
-    }
-
-    .accordion-content {
-        width: 80%;
-        left: 10%;
-        top: 60px;
-    }
 }
 
 @media (max-width: 480px) {
+    /* Adjust search section width */
     .search-section {
         width: 90%;
     }
 
+    /* Adjust search bar */
     .search-bar {
         padding: 8px 10px;
     }
@@ -533,10 +460,7 @@ body.results-displayed .content {
         height: 18px;
     }
 
-    .result-item {
-        padding: 8px;
-    }
-
+    /* Adjust result item text sizes */
     .result-item strong {
         font-size: 14px;
     }
@@ -545,7 +469,8 @@ body.results-displayed .content {
     .album {
         font-size: 12px;
     }
-    
+
+    /* Adjust toggle buttons and letters navigation for song list */
     .toggle-buttons {
         flex-direction: column;
     }
@@ -555,10 +480,13 @@ body.results-displayed .content {
     }
 
     .letters-navigation {
+        flex-wrap: wrap;
         justify-content: center;
     }
 
     .letter {
-        margin: 1px;
+        font-size: 12px;
+        padding: 4px 6px;
+        margin: 2px;
     }
 }

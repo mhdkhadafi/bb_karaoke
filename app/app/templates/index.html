@@ -6,10 +6,10 @@
     <title>BB Karaoke</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
+<body class="{{ 'fixed-header' if search_results or spotify_results else 'center-content' }}">
 
     <!-- Logo -->
-    <div class="logo">
+    <div class="logo {{ 'fixed-top' if search_results or spotify_results else '' }}">
         <a href="/" class="logo-text">BB Karaoke</a>
     </div>
 
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Search Section -->
-    <div class="search-section">
+    <div class="search-section {{ 'fixed-top' if search_results or spotify_results else '' }}">
         <!-- Search Bar -->
         <div class="search-container">
             <form method="POST" id="search-form">
