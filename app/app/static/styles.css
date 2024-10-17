@@ -170,6 +170,18 @@ body.center-content .logo {
     font-size: 24px;
 }
 
+.queue-container p {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px auto 10px auto;
+    font-size: 16px;
+}
+
+.song-list-container h2 {
+    margin: 20px auto 10px auto;
+    font-size: 24px;
+}
+
 body.fixed-header .song-list-container {
     width: 80%;
     max-width: 1200px;
