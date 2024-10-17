@@ -3,6 +3,7 @@
 from track_downloader import search_spotify
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from .models import SongQueue
+from .utils import search_songs
 from extensions import db
 import os
 
@@ -63,7 +64,3 @@ def progress(song_id):
         return jsonify({'progress': progress, 'status': status})
     else:
         return jsonify({'progress': 0, 'status': 'unknown'})
-
-def search_songs(query, limit=5):
-    # Collect all songs in the output directory
-    pass
