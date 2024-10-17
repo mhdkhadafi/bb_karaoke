@@ -27,8 +27,8 @@
     <div class="song-list-container">
         <!-- Toggle between 'By Song' and 'By Artist' -->
         <div class="toggle-buttons">
-            <a href="{{ url_for('main.song_list', view='song', letter='A') }}" class="toggle-button {{ 'active' if view_type == 'song' else '' }}">By Song</a>
-            <a href="{{ url_for('main.song_list', view='artist', letter='A') }}" class="toggle-button {{ 'active' if view_type == 'artist' else '' }}">By Artist</a>
+            <a href="{{ url_for('main.song_list', view='song', letter=letter) }}" class="toggle-button {{ 'active' if view_type == 'song' else '' }}">By Song</a>
+            <a href="{{ url_for('main.song_list', view='artist', letter=letter) }}" class="toggle-button {{ 'active' if view_type == 'artist' else '' }}">By Artist</a>
         </div>
 
         <!-- Letters Navigation -->

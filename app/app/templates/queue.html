@@ -30,7 +30,9 @@
             <div class="results-list">
                 {% for song in songs_in_queue %}
                     <div class="result-item">
-                        <button type="submit" class="remove-button" onclick="removeFromQueue({{ song.id }})">×</button>
+                        <form method="POST" action="{{ url_for('main.remove_from_queue', song_id=song.id) }}">
+                            <button type="submit" class="remove-button">×</button>
+                        </form>
                         <strong>{{ song.name }}</strong><br>
                         <span class="artist">by: {{ song.artist }}</span><br>
                         <span class="album">album: {{ song.album }}</span><br>

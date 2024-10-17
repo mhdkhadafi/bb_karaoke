@@ -152,9 +152,21 @@ body.center-content .logo {
 .search-section.fixed-top {
     position: fixed;
     top: 70px;
-    width: calc(100% - 40px);
-    margin: 0 20px;
+    width: 80%;
+    max-width: 800px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 99;
+    margin: 0 auto; /* Center the search bar */
+}
+
+/* Headings for Results */
+.results-container h2,
+.spotify-results-container h2 {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px auto 10px auto;
+    font-size: 24px;
 }
 
 /* Content starts below the fixed header */
