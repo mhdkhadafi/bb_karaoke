@@ -44,10 +44,10 @@ COPY . .
 RUN chmod +x /app/replace_zotify_credentials.sh
 
 # Expose the port that the Flask app runs on (for example, port 5000)
-EXPOSE 5000
+EXPOSE 80
 
 # Define environment variable for Flask app
 ENV FLASK_APP="app:create_app()"
 
 # Run the application
-CMD ["/bin/bash", "-c", "/app/replace_zotify_credentials.sh && flask run --host=0.0.0.0"]
+CMD ["/bin/bash", "-c", "/app/replace_zotify_credentials.sh && flask run --host=0.0.0.0 --port=80"]

@@ -2,7 +2,7 @@
 
 from extensions import db
 from .models import AvailableSong, SongQueue
-from fuzzywuzzy import process
+from fuzzywuzzy import process, fuzz
 
 def update_song_progress(song_id, progress, status):
     song = SongQueue.query.get(song_id)
@@ -11,36 +11,43 @@ def update_song_progress(song_id, progress, status):
         song.status = status
         db.session.commit()
 
-def search_songs(query, limit=5):
+def search_songs(query, limit=10):
     if not query:
         return []
 
-    # Fetch all available songs
-    songs = AvailableSong.query.all()
+    query = query.lower()
 
-    # Prepare data for fuzzy matching
-    song_data = []
-    for song in songs:
-        combined = f"{song.artist} {song.album} {song.song_name}"
-        song_data.append((combined, song))
+    results = []
 
-    # Perform fuzzy search
-    results = process.extract(query, [data[0] for data in song_data], limit=limit)
+    for song in AvailableSong.query.all():
+        artist = song.artist.lower()
+        album = song.album.lower()
+        song_name = song.song_name.lower()
 
-    # Collect the best matches
-    best_matches = []
-    for match in results:
-        combined_string, score = match
-        for data in song_data:
-            if data[0] == combined_string:
-                song = data[1]
-                best_matches.append({
-                    'song_name': song.song_name,
-                    'artist_name': song.artist,
-                    'album_name': song.album,
-                    's3_key': song.s3_key,
-                    'score': score
-                })
-                break
+        # Calculate individual fuzzy scores
+        artist_score = fuzz.token_sort_ratio(query, artist)
+        album_score = fuzz.token_sort_ratio(query, album)
+        song_name_score = fuzz.token_sort_ratio(query, song_name)
+        combined_score = fuzz.token_sort_ratio(query, f"{artist} {album} {song_name}")
+
+        # Max score among the fields
+        score = max(artist_score, album_score, song_name_score, combined_score)
+
+        # Append to results
+        results.append({
+            'id': song.id,
+            'song_name': song.song_name,
+            'artist_name': song.artist,
+            'album_name': song.album,
+            's3_key': song.s3_key,
+            'score': score
+        })
+
+    # Filter out low scores
+    min_score = 50  # Adjust based on testing
+    filtered_results = [r for r in results if r['score'] >= min_score]
+
+    # Sort and limit
+    best_matches = sorted(filtered_results, key=lambda x: x['score'], reverse=True)[:limit]
 
     return best_matches

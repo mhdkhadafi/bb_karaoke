@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BB Karaoke - Full Song List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <!-- Logo (Fixed at the top) -->
+    <div class="logo">
+        <a href="/" class="logo-text">BB Karaoke</a>
+    </div>
+
+    <!-- Accordion Navigation -->
+    <div class="accordion-nav">
+        <button class="accordion-btn" onclick="toggleAccordion()">☰</button>
+        <div class="accordion-content">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/queue" class="nav-link">Queue</a>
+            <a href="/song_list" class="nav-link">Song List</a>
+        </div>
+    </div>
+
+    <!-- Song List Container -->
+    <div class="song-list-container">
+        <!-- Toggle between 'By Song' and 'By Artist' -->
+        <div class="toggle-buttons">
+            <a href="{{ url_for('main.song_list', view='song', letter='A') }}" class="toggle-button {{ 'active' if view_type == 'song' else '' }}">By Song</a>
+            <a href="{{ url_for('main.song_list', view='artist', letter='A') }}" class="toggle-button {{ 'active' if view_type == 'artist' else '' }}">By Artist</a>
+        </div>
+
+        <!-- Letters Navigation -->
+        <div class="letters-navigation">
+            {% for l in letters %}
+                <a href="{{ url_for('main.song_list', view=view_type, letter=l) }}" class="letter {{ 'active' if l == letter else '' }}">{{ l }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Song or Artist List -->
+        {% if view_type == 'artist' %}
+            <!-- View by Artist -->
+            {% if songs %}
+                <div class="artist-list">
+                    {% for artist_name, artist_songs in songs.items() %}
+                        <div class="artist-section">
+                            <h3>{{ artist_name }}</h3>
+                            <ul class="song-list">
+                                {% for song in artist_songs %}
+                                    <li>
+                                        <strong>{{ song.song_name }}</strong> - {{ song.album }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No artists found.</p>
+            {% endif %}
+        {% else %}
+            <!-- View by Song -->
+            {% if songs %}
+                <ul class="song-list">
+                    {% for song in songs %}
+                        <li>
+                            <strong>{{ song.song_name }}</strong> by {{ song.artist }} - {{ song.album }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No songs found.</p>
+            {% endif %}
+        {% endif %}
+
+        <!-- Pagination -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('main.song_list', view=view_type, letter=letter, page=page-1) }}" class="pagination-button">Previous</a>
+            {% endif %}
+            <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ url_for('main.song_list', view=view_type, letter=letter, page=page+1) }}" class="pagination-button">Next</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Toggle function for accordion menu
+        function toggleAccordion() {
+            var content = document.querySelector('.accordion-content');
+            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+
+</body>
+</html>
+

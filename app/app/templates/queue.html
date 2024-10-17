@@ -18,6 +18,7 @@
         <div class="accordion-content">
             <a href="/" class="nav-link">Home</a>
             <a href="/queue" class="nav-link">Queue</a>
+	    <a href="/song_list" class="nav-link">Song List</a>
         </div>
     </div>
 
@@ -35,7 +36,7 @@
                         <div class="progress-bar">
                             <div class="progress" id="progress-{{ loop.index0 }}"></div>
                         </div>
-                        <form method="POST" action="{{ url_for('remove_from_queue', song_id=song.id) }}">
+                        <form method="POST" action="{{ url_for('main.remove_from_queue', song_id=song.id) }}">
                             <button type="submit" class="remove-button">×</button>
                         </form>
                     </div>

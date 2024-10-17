@@ -1,5 +1,6 @@
 from extensions import db
 from datetime import datetime
+from extensions import db
 
 class SongQueue(db.Model):
     __tablename__ = 'song_queue'
@@ -10,6 +11,7 @@ class SongQueue(db.Model):
     album = db.Column(db.String(255), nullable=False)
     spotify_url = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(50), nullable=False, default='queued')
+    progress = db.Column(db.Integer, default=0)  # Progress from 0 to 100
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 class AvailableSong(db.Model):

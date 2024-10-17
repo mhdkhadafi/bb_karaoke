@@ -1,11 +1,10 @@
 import os
 import shutil
 import tempfile
-from celery_app import celery_app
 from celery import shared_task, chain
 from .models import AvailableSong, SongQueue
 from extensions import db
-from app.utils import update_song_progress
+from .utils import update_song_progress
 from track_downloader import download_audio, download_video, download_lyrics
 from karaoke_video_maker import create_video, lrc_to_srt, remove_vocals, split_srt_to_two
 from aws_helpers import upload_to_s3
@@ -31,8 +30,8 @@ def process_queue():
 
         task_chain = chain(
             run_download_process.s(song.id, artist_name, album_name, song_name, url),
-            create_karaoke.s(song.id, artist_name, album_name, song_name),
-            update_song_status.s(song.id)
+            create_karaoke.si(song.id, artist_name, album_name, song_name),
+            update_song_status.si(song.id)
         )
 
         task_chain.link_error(mark_song_as_failed.s(song.id))
@@ -69,7 +68,7 @@ def create_karaoke(song_id, artist_name, album_name, song_name):
             # Remove vocals
             update_song_progress(song_id, progress=60, status="Removing Vocals")
             accompaniment_file = os.path.join(temp_dir, "accompaniment.wav")
-            remove_vocals(audio_file, temp_dir, accompaniment_file)
+            remove_vocals(audio_file, input_folder, accompaniment_file)
 
             # Convert lrc to srt
             update_song_progress(song_id, progress=70, status="Converting Lyrics")
@@ -109,9 +108,23 @@ def create_karaoke(song_id, artist_name, album_name, song_name):
             db.session.add(song)
             db.session.commit()
 
-            # Clean up input files
-            update_song_progress(song_id, progress=95, status="Cleaning Up")
-            shutil.rmtree(input_folder)
+            # Check if there are any other pending songs
+            pending_songs = SongQueue.query.filter(
+                SongQueue.id != song_id,
+                SongQueue.status.not_in(['completed', 'Completed'])
+            ).count()
+
+            if pending_songs == 0:
+                # No other pending songs; safe to clean up
+                update_song_progress(song_id, progress=100, status="Cleaning Up")
+                # Perform file cleanup
+                # shutil.rmtree(input_folder)
+                for filename in os.listdir(input_folder):
+                    filepath = os.path.join(input_folder, filename)
+                    if os.path.isfile(filepath):
+                        os.remove(filepath)
+                    elif os.path.isdir(filepath):
+                        shutil.rmtree(filepath)
 
             # Update status to completed
             update_song_progress(song_id, progress=100, status="Completed")

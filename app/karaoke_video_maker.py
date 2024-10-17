@@ -30,10 +30,10 @@ def remove_vocals(input_file, output_folder, output_file):
     ]
 
     subprocess.run(command, check=True)
-
+    
     # Move the accompaniment file to the desired output file
     original_accompaniment_file = os.path.join(
-        os.path.dirname(output_folder), 
+        output_folder, 
         os.path.splitext(os.path.basename(input_file))[0], 
         'accompaniment.wav'
     )
